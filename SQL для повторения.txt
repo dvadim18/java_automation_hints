@@ -1,0 +1,2478 @@
+=============================================================SELECT================================================================
+Концепции:
+1) выбор столбцов из таблиц (projection)
+2) выбор строк из таблиц (selection)
+3) объединение таблиц (joining)
+
+SELECT не меняет данные, а только извлекает их из таблиц
+
+Базовый синтаксис: 
+SELECT * FROM table;
+SELECT column(s) FROM table;
+
+=============================================================DISTINCT================================================================
+Возвращает уникальные значения столбца(ов)
+
+Базовый синтаксис:
+SELECT DISTINCT column(s) FROM table;
+
+========================================================Выражения в SELECT=========================================================
+Синтаксис:
+SELECT column(s), expression(s) from table;
+
+Примеры выражений с типом данных number:
+Select salary*2 from employees; (умножаем значение каждой строки в столбце salary на 2)
+Select first_name, salary, salary*1,5 from employees;
+При арифметических операциях со значением NULL всегда возращается NULL
+
+Примеры выражений с типом данных date:
+select end_date-start_date+1 from job_history; (возвращается количество дней между датами указанными в столбцах)
+select start_date+7 from job_history; (возвращается дата из столбца + 7 дней)
+
+Примеры выражений с типом данных текст:
+select first_name||last_name from employees; (|| - concatination, сложение текста, чисел из столбцов в одном)
+select 'First name is '||first_name||' and last name is '||last_name from employees;
+
+================================================================Alias==============================================================
+Alias - альтернативное имя для столбца или целого выражения
+
+Синтаксис:
+SELECT column(s) alias, expression(s) alias from table;
+
+Пример:
+Select salary*2 as bonus from employees;
+Select start_date start, end_date end, (end_date-start_date)+1 "Count Of Days" from job_history;
+select 'First name is '||first_name||' and last name is '||last_name our_employees from employees;
+
+============================================================таблица DUAL===========================================================
+Синтаксис:
+Select 'privet, '||'dorogoy student' as greeting from dual;
+
+==================================================Импользование кавычек в тексте===================================================
+1) Select 'It''s my life' as song from dual; (чтобы внутри текста отображалась кавычка, можно использовать две одинарных кавычки)
+Вывод: It's my life
+
+2) Оператор Quote (q)
+q' delimiter наш текст с кавычками delimiter'
+Select q'<It's my life>' as song from dual;
+
+===============================================================Where===============================================================
+Синтаксис:
+SELECT *|{DISTINCT column(s) alias, expression(s) alias}
+FROM table
+WHERE condition(s)
+
+ПРимер:
+Select * from employees where salary = 4800;
+Select first_name, salary from employees where last_name = 'King';
+Select email from employees where hire_date = '21.09.05';
+
+Операторы сравнения: = > < >= <= !=(не равно) <>(не равно)
+
+==============================================================BETWEEN==============================================================
+Примеры:
+Select first_name, last_name, salary from employees
+where salary between 4000 and 10000;
+
+Select first_name, last_name, salary from employees
+where salary between employee_id+100 and 10000;
+
+Select * from job_history
+where start_date between '01.01.04' and '31.12.06';
+
+Select * from employees
+where first_name between 'A' and 'C';
+
+================================================================IN=================================================================
+Примеры:
+Select * from departments where location_id in (1700, 2400, 1500);
+
+Select * from job_history where job_id in ('IT_PROG', 'ST_CLERK');
+
+Select * from job_history where end_date in ('31.12.07', '05.05.05');
+
+=============================================================IS NULL===============================================================
+Примеры:
+Select * from employees where commission_pct is null;
+
+==============================================================LIKE=================================================================
+Работает только с текстовым типом данных в столбцах
+
+Примеры:
+Select * from employees where first_name like 'S%'; % - означает любое количество символов
+
+Select * from employees where first_name like 'D_n'; _ - означает один символ
+
+Select * from employees where first_name like 'A%d%';
+
+Select * from employees where first_name like '__n%';
+
+Если в искомом значении присутствуют символы _ или %, то необходимо использовать оператор escape
+select * from employees where job_id like 'ST\_%' escape '\' (означает, что один символ после \ является частью искомого слова, а 
+не спец символом
+
+==============================================================AND==================================================================
+Всё выражение принимает значение TRUE когда все условия, объединённые AND, по отдельности тоже возращают TRUE
+
+Примеры:
+Select * from employees where first_name like 'D%' and salary > 10000 and job_id = 'SA_REP';
+
+==============================================================OR===================================================================
+Всё выражение принимает значение TRUE когда хотя бы одно из условий, объединённых OR, по отдельности тоже возращает TRUE
+
+Примеры:
+Select * from employees where first_name like 'D%' or salary > 10000 or job_id = 'SA_REP';
+
+==============================================================NOT==================================================================
+Оператор NOT меняет значение условия на противоположное
+
+Примеры:
+select * from employees where not job_id = 'SA_MAN';
+
+select * from employees where last_name not like 'K%';
+
+select * from employees where job_id not in ('ST_MAN', 'ST_CLERK');
+
+select * from employees where salary not between 5000 and 6500;
+
+select * from employees where comission_pct is not null;
+
+==============================================Приоритетность выполнения операторов=================================================
+Приоритет выполнения оператора AND выше чем у OR
+
+1 ()
+2 / и *
+3 + и -
+4 ||
+5 = > < >= <=
+6 [NOT] LIKE, IS [NOT] NULL, [NOT] IN
+7 [NOT] BETWEEN
+8 != <>
+9 NOT
+10 AND
+11 OR
+
+============================================================ORDER BY===============================================================
+Синтаксис:
+SELECT *|{DISTINCT column(s) alias, expression(s) alias}
+FROM table
+WHERE condition(s)
+ORDER BY {col(s)|expr(s)|numeric position}
+{ASC|DESC}{NULLS FIRST|LAST};
+
+Примеры:
+select first_name, salary from employees order by salary;
+
+select first_name, commission_pct from employees order by commission_pct desc nulls last; (NULLS FIRST|LAST означает где будут 
+отображены значения null, сверху или снизу столбца)
+
+select first_name, salary from employees order by 2; (цифра 2 означает порядковый номер столбца выбранный нами для отображения после
+ключевого слова select, в данном случае это столбец salary)
+
+select first_name, salary from employees order by job_id desc, last_name, 2 desc; (сортировка по нескольким столбцам)
+
+============================================================Функции================================================================
+Виды:
+1) Single-row (количество строк на входе в функцию равняется количеству строк на выходе, row by row)
+- Character (функции работающие с текстом)
+- Numeric (функции работающие с числами)
+- Date (функции работающие с датами)
+- Conversion (функции которые преобразуют тип данных)
+- General (функции работающие с null значениями)
+2) Multiple-row (на вход подаётся несколько строк, а на выходе одна)
+
+=======================================================Character функции===========================================================
+- Case conversion функции
+1) LOWER(s) гдe s - строка, текст
+
+Пример:
+select lower(first_name) from employees;
+
+select lower('Privet, KAK DELa?888') from dual;
+
+select * from employees where lower(first_name) = 'david';
+
+2) UPPER(s) гдe s - строка, текст
+
+Примеры:
+select upper(first_name) from employees;
+
+select upper('Privet, KAK DELa?888') from dual;
+
+select * from employees where upper(first_name) = 'DAVID';
+
+3) INITCAP(s) гдe s - строка, текст
+Функция делает первую букву каждого слова заглавной, а остальные буквы прописными
+
+Примеры:
+select initcap(first_name) from employees;
+
+select initcap('Privet, KAK DELa?888') from dual;
+
+select * from employees where initcap(first_name) = 'David';
+
+4) CONCAT(s, s) , где s - это строка, текст
+совмещает данные из двух аргументов, является аналогом конкатенации (||)
+
+Примеры:
+select concat('privet, ', 'drug') from dual;
+
+select concat(55, 'drug') from dual;
+
+select concat(salary*2, hire_date) from employees;
+
+select concat('privet, ', concat('moy ', 'drug')) from dual;
+
+5) LENGTH(s) , где s - это строка, текст
+Вычисляет длину строки
+
+Примеры:
+select first_name, lenght(first_name) dlina from employees;
+
+select lenght('Daniil') from dual;
+
+select lenght(salary), lenght(hire_date) from employees;
+
+select country_name from countries where lenght(country_name) > 8;
+
+select country_name from countries order by lenght(country_name);
+
+6) LPAD(s, n, p) и RPAD(s, n, p) , где s - это строка, текст; n - конечная длина текста; p - текст для заполнения
+Заполняет разницу между длиной строки s и конечной длинной текста n текстом p справа или слева соответственно
+
+Примеры:
+select lpad('Dan', 7, '*') from dual;
+Вывод: ****Dan
+
+7) TRIM({trailing|leading|both} trimstring from s) , где s - это строка, текст; trimstring - текст, который надо срезать
+Удаляет текст trimstring с конца(trailing), с начала(leading) или и с конца и с начала(both) из указанного текста или строки(s)
+
+Примеры:
+select trim(trailing 'q' from 'Zaurqqqqqqqq') from dual;
+Вывод: Zaur
+
+select trim(leading '*' from '*****Zaur**') from dual;
+Вывод: Zaur**
+
+select both(leading '*' from '*****Zaur**') from dual;
+Вывод: Zaur
+
+select both(' ' from '     Zaur    ') from dual;
+Вывод: Zaur
+
+select both('     Zaur    ') from dual; // по умолчанию удаляет пробелы слева и справа текста
+Вывод: Zaur
+
+8) INSTR(s, search string, start position, Nth occurrence) , где s - это строка, текст; search string - искомый текст;
+start position - позиция для начала работы; Nth occurrence - N-ое появление
+Возвращает позицию искомого текста в s
+
+Примеры:
+select * from employees where instr(job_id, 'PROG') = 4;
+
+select instr('Zaur Tregulov', 'u') from dual;
+Вывод: 3 // в тексте есть 2 значения 'u' , возвращается позиция первого встреченного значения
+
+select instr('Zaur Tregulov', 'w') from dual;
+Вывод: 0 // если значение не найдено, то возвращается 0
+
+select instr('Zaur Tregulov', 'u', 2, 2) from dual;
+Вывод: 10 // ищем значение 'u' начиная со второй позиции, возвращаем позицию второго встреченного значения
+
+9) SUBSTR(s, start position, number of characters) , где s - это строка, текст; start position - позиция для начала работы;
+number of characters - количество символов
+Возвращает указанное количество символов(number of characters) начиная со start position
+Если start position больше длины текста, то возвращается null
+
+Примеры:
+select email, substr(email, 4) from employees;
+
+select substr('privet, kak dela?', -9) from dual;
+Вывод: kak dela? // если start position отрицательно число, то отсчёт начинается с конца текста
+
+select substr('privet, kak dela?', -4, 2) from dual;
+Вывод: el
+
+10) REPLACE(s, search item, replacement item) , где s - это строка, текст; search string - искомый текст; replacement item - 
+заменяющий элемент
+Заменяет в тексте s указанный текст search item на replacement item
+
+Примеры:
+select replace('kak dela, chto horoshego?', 'o', '*') from dual;
+Вывод: kak dela, cht* hor*sheg*?
+
+select replace('kak dela, chto horoshego?', 'o') from dual;
+Вывод: kak dela, cht hrsheg? // если replacement item не указан функция удаляет search item из текста
+
+===========================================================NUMERIC функции===========================================================
+Все параметры и return типы являются числами
+
+1) ROUND(n, precision) , где n - число; precision - точность
+Округление числа
+
+Пример:
+Select ROUND(3.14) from dual; // Если не указывать второй параметр, то округляется до целого числа
+
+Select ROUND(3.14, 0) from dual; // Аналогично первому примеру
+
+Select ROUND(3.1456789, 2) from dual; // 3,14
+
+Select ROUND(356826, -1) from dual; // 356830, округляется по цифре на последней поизиции числа
+
+Select ROUND(356826, -2) from dual; // 356800
+
+2) TRUNC(n, precision) , где n - число; precision - точность(количество знаков после запятой)
+Оставляет указанное количество знаков(precision) после запятой
+
+Примеры:
+Select TRUNC(3.14) from dual; // Если не указывать второй параметр, то возвращает целое числа
+
+Select TRUNC(3.14565б, 2) from dual; // Возвращает 3.14
+
+Select TRUNC(356826.975, -1) from dual; // Возвращает 356820
+
+Select TRUNC(356826.975, -2) from dual; // Возвращает 356800
+
+3) MOD(dividend, divisor), где dividend - делимое, divisor - делитель
+Возвращает остаток от деления
+
+Примеры:
+Select mod(7, 3) from dual; // Возвращает 1
+
+Select mod(9, 3) from dual; // Возвращает 0
+
+Select mod(3.1, 2) from dual; // Возвращает 1.1
+
+Select mod(3.1, 2.2) from dual; // Возвращает 0.9
+
+select * from employees where mod(employee_id, 2) = 0; // Возвращает строки с чётным employee_id
+
+=============================================================DATE функции==========================================================
+1) SYSDATE - возвращает текущую дату data base сервера
+
+Примеры:
+select sysdate from dual; // 27.03.21
+
+select TO_CHAR(sysdate, 'DD-MM-RR hh24:mi:ss') from dual; // Возвращает системную дату в указанном формате
+
+Из даты можно только вычесть дату, сложить, пермножить и разделить даты нельзя!
+
+2) MONTHS_BETWEEN(start_date, end_date) - возвращает количество месяцев между start_date и end_date
+start_date - текущая дата(большая дата)
+
+Примеры:
+select employee_id, MONTHS_BETWEEN(start_date, end_date) from job_history;
+
+3) ADD_MONTHS(date, number_of_month) , где number_of_month - количество месяцев
+
+4) NEXT_DAY(date, day_of_the_week)  , где day_of_the_week - либо порядковый номер недели, либо название дня недели (см формат)
+select * from sys.nls_session_parameters; - посмотреть параметры дат и тд
+
+5) LAST_DAY(date) - возвращает последний день месяца
+
+6) ROUND(date, date precision format) , где date precision format - точность округления
+СС - век, YYYY - год, Q - квартал, MM - месяц, W - неделя, DD - день, HH - час, MI - минута
+
+7) TRUNC(date, date precision format)
+
+===================================================================================================================================
+=========================================================Сonversion functions======================================================
+===================================================================================================================================
+- To_char
+- To-Date
+- TO_number
+
+===============================================================TO_CHAR(числа)=============================================================
+Шаблон:
+TO_CHAR(number, format mask, nls_parameters) = T
+
+Примеры:
+select to_char(18) from dual;
+
+select to_char(18, '99999') from dual; //18
+
+select to_char(181818, '99999') from dual; //18181
+
+select to_char(18, '099999') from dual; //000018 
+
+select to_char(18.35, '099999.999') from dual; //000018.350
+
+select to_char(18.35, '099999D999') from dual; //000018.350
+
+select to_char(1234567, '099,999,999') from dual; // 001,234,567
+
+select to_char(1234567, '99G999G999') from dual; // 1,234,567
+
+select to_char(18, '$99999') from dual; //$18
+
+select to_char(18, 'L99999') from dual; //$18 L - локальная валюта
+
+select to_char(-18, '99999MI') from dual; //18-
+
+select to_char(-18, 'MI99999') from dual; // ERROR
+
+select to_char(-18, '99999PR') from dual; // <18>
+
+select to_char(18, '99999PR') from dual; // 18
+
+select to_char(-18, 'S99999') from dual; // -18
+
+select to_char(18, 'S99999') from dual; // +18
+
+================================================================TO_CHAR(даты)====================================================
+Шаблон:
+TO_CHAR(date, format mask, nls_parameters) = T;
+
+Примеры:
+select to_char('23-SEP-83') from dual;
+
+select to_char(sysdate, 'Y') from dual; // возвращает последнюю цифру года
+YY - последние 2 цифры года
+YYY - последние 3 цифры года
+YYYY - год целиком
+
+select to_char(sysdate, 'RR') from dual; // год в формате двух цифр
+
+select to_char(sysdate, 'YEAR') from dual; // TWENTY TWENTY ONE
+select to_char(sysdate, 'year') from dual; // twenty twenty one
+
+select to_char(sysdate, 'MM') from dual; // месяц в формате двух цифр
+
+select to_char(sysdate, 'MON') from dual; // APR
+select to_char(sysdate, 'mon') from dual; // apr
+
+select to_char(sysdate, 'MONTH') from dual; // APRIL
+select to_char(sysdate, 'month') from dual; // april
+
+select hire_date, to_char(hire_date, 'Month', 'NLS_DATE_LANGUAGE = RUSSIAN') from employees; // выводит название месяца для русского региона
+
+select to_char(sysdate, 'd') from dual; // возвращает порядковый номер дня недели
+
+select to_char(sysdate, 'dd') from dual; // возвращает день месяца
+
+select to_char(sysdate, 'ddd') from dual; // возвращает день года
+
+select to_char(sysdate, 'dy') from dual; // mon
+select to_char(sysdate, 'DY') from dual; // MON
+
+select to_char(sysdate, 'DAY') from dual; // MONDAY
+select to_char(sysdate, 'day') from dual; // monday
+
+select to_char(sysdate, 'W') from dual; // возвращает номер недели месяца
+
+select to_char(sysdate, 'WW') from dual; // возвращает номер недели года
+
+select to_char(sysdate, 'Q') from dual; // возвращает порядковый номер квартала
+
+select to_char(sysdate, 'AM') from dual; // возвращает AM или PM(время до полуночи или после)
+
+==========================================================================TO_DATE=====================================================================
+Шаблон:
+TO_DATE(text, format mask, nls_parameters) = D
+
+Примеры:
+select to_date('08-MAR-19') from dual; // вместо "-" можно использовать любые разделители
+
+select to_date('18:40 2019!17-Sep', 'HH24:mi yyyy!dd-Mon') from dual; // указываем формат указанного нами текста с датой, возвращает дату в 
+соответствии с nls параметрами БД (17-Sep-19)
+
+select to_char(to_date('28-Sep-19 15:16:17', 'dd-Mon-RR hh24:mi:ss'), 'hh24:mi:ss') from dual; // 15:16:17
+
+=========================================================================TO_NUMBER====================================================================
+Шаблон:
+TO_NUMBER(text, format mask, nls_parameters) = N
+
+Примеры:
+select to_number('555.77') from dual;
+
+select to_number('$555.77', '$9999999.999') from dual; // 555.77
+
+select to_number('<4555.77>' '99999.999PR') from dual; // -4555.77
+
+======================================================================================================================================================
+=====================================================================GENERAL FUNCTIONS================================================================
+======================================================================================================================================================
+Необходимы для работы со значениями null
+
+1) NVL(value, ifnull) если параметр value = null, то возвращается значение установленное в параметре ifnull
+значения value и ifnull должны быть одного типа
+
+Пример:
+select first_name, nvl(comission_pct, 0) from employees; // возвращает 0, если столбец comission_pct = null
+
+select first_name, nvl(substr(first_name, 6), 'name is too short') from employees;
+
+select first_name
+
+2) NVL2(value, ifnotnull, ifnull) если параметр value != null, то функция возвращает значение параметра ifnotnull, если параметр value = null, то
+функция возвращает значение параметра ifnull
+значения параметров ifnotnull, ifnull не могут быть типа long
+значения параметров ifnotnull, ifnull должны быть одного типа данных
+
+Примеры:
+select nvl2(17, 18, 19) from dual; // 18
+
+select nvl2(null, 18, 19) from dual; // 19
+
+3) NULLIF(value1, value2) 
+если value1 = value2, то функция возвращает null
+если value1 != value2, то функция возвращает value1
+значения параметров value1 и value2 должны быть одного типа
+
+Примеры:
+select nullif(18, 18) from dual; // null
+
+select nullif(17, 18) from dual; // 17
+
+select country_id, country_name, nvl(nullif(country_id, upper(substr(country_name, 1, 2))), 'Sovpadaet', 'Ne sovpadaet') sravnenie from countries;
+
+4) COALESCE(value1, value2, ... , valueN) возращает первое встреченное значение параметра != null, если таких значений нет, то возвращает null
+все значения параметров должны быть одного типа
+
+Примеры:
+select coalesce(1, null, 2) from dual; // 1
+
+select coalesce(null, null, 2) from dual; // 2
+
+select coalesce(null, null, null) from dual; // null
+
+========================================================================================================================================================
+================================================================Conditional функции=====================================================================
+========================================================================================================================================================
+1) DECODE(expr, comp1, iftrue1, comp2, iftrue2, ..., compN, iftrueN, iffalse)
+если expr = comp1, то выводится iftrue1
+функция используется только в Oracle
+
+Примеры:
+select decode(3*4, 12, 'twelve') from dual; // twelve
+
+select decode(3*4, 13, 'twelve') from dual; // null
+
+select decode(3*4, 13, 'firteen', 14, 'fourteen', 12, 'twelve') from dual; // twelve
+
+select decode(4*4, 13, 'firteen', 14, 'fourteen', 12, 'twelve', 'error') from dual; // error
+
+select decode(null, 5, 'ok', null, 55) from dual; // 55 
+
+select decode(2 + 2 * 2, 5, 'five', 12 / 2, 'six1', 6, 'six2') from dual; // six1 (выводится первое совпадение, далее цикл не выполняется)
+
+2) simple case - значения iftrue должны быть одного типа
+CASE expr
+WHEN comp1 THEN iftrue1
+WHEN comp2 THEN iftrue2
+...
+WHEN compN THEN iftrueN
+ELSE iffalse
+END
+
+ПРимеры:
+CASE 3*4
+WHEN 12 THEN 100
+END
+from dual; // 100
+
+CASE 3*4
+WHEN 11 THEN 'eleven'
+WHEN 12 THEN 'twelve1'
+WHEN 24 / 2 THEN 'twelve2'
+END
+from dual; // twelve1 (возвращает первое совпадение, дальше цикл не идёт)
+
+CASE 3*5
+WHEN 11 THEN 'eleven'
+WHEN 12 THEN 'twelve1'
+WHEN 24 / 2 THEN 'twelve2'
+END
+from dual; // null
+
+CASE 3*5
+WHEN 11 THEN 'eleven'
+WHEN 12 THEN 'twelve1'
+WHEN 24 / 2 THEN 'twelve2'
+ELSE 'error'
+END
+from dual; // error
+
+3) searched case
+CASE
+WHEN cond1 THEN iftrue1
+WHEN cond2 THEN iftrue2
+...
+WHEN condN THEN iftrueN
+ELSE ifelse
+END
+
+Примеры:
+CASE 
+WHEN 3*4 THEN 100
+END
+from dual; // 100
+
+CASE 
+WHEN 3*4=11 THEN 'eleven'
+WHEN 3*4=12 THEN 'twelve1'
+WHEN 3*4=24 / 2 THEN 'twelve2'
+END
+from dual; // twelve1 (возвращает первое совпадение, дальше цикл не идёт)
+
+CASE 
+WHEN 3*4=11 THEN 'eleven'
+WHEN 'ok'='om' THEN 'ok'
+WHEN 3*4=24 / 2 THEN 'twelve2'
+ELSE 'error'
+END AS Result
+from dual; // error
+
+
+ДЗ
+1) select * from employees where instr(upper(first_name), 'B') != 0;
+2) select * from employees where instr(first_name, 'a', 1, 2) != 0;
+3) select substr(job_id, 1, instr(job_id, '_') - 1) from employees where instr(job_id, '_') != 0;
+4) select substr(first_name, 2, length(first_name) - 2) from employees;
+5) select * from employees where substr(job_id, instr(job_id, '_') + 1) like '__%' and 
+substr(job_id, instr(job_id, '_') + 1) != 'CLERK';
+или
+select * from employees where length(substr(job_id, instr(job_id, '_') + 1)) >= 3 and 
+substr(job_id, instr(job_id, '_') + 1) != 'CLERK';
+6) select * from employees where to_char(hire_date, 'dd') = '01';
+7) select * from employees where to_char(hire_date, 'yyyy') = '2008';
+8) select to_char(sysdate + 1, '"Tommorow is "Ddthsp" day of" Month') from dual;
+9) select first_name, to_char(hire_date, 'ddth "of "fmMonth", "yyyy') from employees;
+10) select first_name, to_char(salary + (salary / 100) * 20, '$99,999.99') from employees;
+11) 
+select 
+to_char(to_date('24-APR-2021 14:45:00', 'dd-MON-yyyy hh24:mi:ss'), 'dd-MON-yyyy hh24:mi:ss'),
+to_char(to_date('24-APR-2021 14:45:01', 'dd-MON-yyyy hh24:mi:ss'), 'dd-MON-yyyy hh24:mi:ss'),
+to_char(to_date('24-APR-2021 14:46:00', 'dd-MON-yyyy hh24:mi:ss'), 'dd-MON-yyyy hh24:mi:ss'),
+to_char(to_date('24-APR-2021 15:45:00', 'dd-MON-yyyy hh24:mi:ss'), 'dd-MON-yyyy hh24:mi:ss'),
+to_char(to_date('25-APR-2021 14:45:00', 'dd-MON-yyyy hh24:mi:ss'), 'dd-MON-yyyy hh24:mi:ss'),
+to_char(to_date('24-MAY-2021 14:45:00', 'dd-MON-yyyy hh24:mi:ss'), 'dd-MON-yyyy hh24:mi:ss'),
+to_char(to_date('24-APR-2022 14:45:00', 'dd-MON-yyyy hh24:mi:ss'), 'dd-MON-yyyy hh24:mi:ss')
+from dual;
+12) select first_name, salary, to_char(salary + 12345.55, '$99,999.99') from employees;
+13) select first_name, hire_date, MONTHS_BETWEEN(to_date('СЕН, 18:45:00 18 2009', 'MON, hh24:mi:ss dd yyyy'), hire_date) 
+from employees;
+14) select first_name, salary, to_char(salary + (salary / 100) * commission_pct, '$99,999.99') from employees;
+
+15) 
+select
+case
+when length(first_name) != length(last_name) then first_name||' '||last_name||' different length'
+when length(first_name) = length(last_name) then 'same length'
+end
+from employees;
+
+16) 
+select
+case 
+when commission_pct is null then first_name||' '||commission_pct||' No'
+else first_name||' '||commission_pct||' Yes'
+end
+from employees;
+
+17)
+select
+first_name,
+case
+when commission_pct is not null then commission_pct
+when manager_id is not null then manager_id
+else salary
+end
+from employees;
+
+18)
+select first_name, salary,
+case
+when salary < 5000 then 'Low level'
+when salary >= 5000 and salary < 10000 then 'Normal level'
+when salary >= 10000 then 'High level'
+end
+from employees;
+
+19)
+select country_name,
+decode(region_id, 1, 'Europe', 2, 'America', 3, 'Asia', 4, 'Africa', 'error')
+from countries;
+
+20)
+select country_name,
+case
+when region_id = 1 then 'Europe'
+when region_id = 2 then 'America'
+when region_id = 3 then 'Asia'
+when region_id = 4 then 'Africa'
+end
+from countries;
+
+21)
+select first_name, salary,
+case
+when salary < 10000 and commission_pct is null then 'BAD'
+when salary between 10000 and 15000 or commission_pct is not null then 'NORMAL'
+when salary >= 15000 then 'GOOD'
+end
+from employees;
+
+
+=========================================================================================================================================================
+=====================================================================GROUP функци========================================================================
+=========================================================================================================================================================
+1) Count
+2) Sum
+3) Avg
+4) Max
+5) Min
+
+=========================================================================Count==========================================================================
+Шаблон:
+Count({*|{DISTINCT|ALL}expression})
+ALL - установлен по умолчанию
+
+Примеры:
+select count(*) from employees; // возвращает количество всех строк в таблице
+
+select count(salary) from employees; // возвращает количество всех строк в столбце salary
+
+select count(*) from employees where salary > 5000; 
+
+select count(commission_pct) from employees; // не учитывает строку, если она равна null
+
+select count(distinct commission_pct) from employees; // возвращает количество уникальных строк в столбце
+
+select count(salary), first_name from employees; // некорректный запрос
+
+======================================================================SUM================================================================================
+Шаблон:
+SUM({DISTINCT|ALL} expression)
+- принимает только число в качестве аргумента
+- если в строке присутствует значение null, то функция игнорирует это значение
+
+Примеры:
+select sum(salary) from employees; // возвращает сумму всех строк в столбце salary
+
+select sum(commission_pct) from employees; // возвращает сумму всех строк в столбце commission_pct (значения null пропускаются)
+
+select sum(distinct commission_pct) from employees;
+
+select round(sum(sysdate - hire_date)) from employees;
+
+select sum(length(first_name)) from employees; // количество букв в именах всех работников
+
+select sum(length(first_name)) / count(*) from employees; // среднее количество букв в имени одного работника
+
+=============================================================================AVG=========================================================================
+Шаблон:
+AVG({DISTINCT|ALL} expression)
+- принимает только число в качестве аргумента
+- если в строке присутствует значение null, то функция игнорирует это значение
+
+Примеры:
+select avg(salary) from employees; // возвращает среднюю зарплату среди всех работников
+
+select avg(nvl(commission_pct, 0)) from employees;
+
+==========================================================================MAX и MIN======================================================================
+Шаблон:
+MIN({DISTINCT|ALL} expression)
+MAX({DISTINCT|ALL} expression)
+- работают с числами, датами и текстом
+- значения null игнорируются
+
+Примеры:
+select min(salary), max(salary) from employees;
+
+select min(hire_date), max(hire_date) from employees;
+
+select min(first_name), max(first_name) from employees;
+
+==========================================================================GROUP BY=======================================================================
+Общий шаблон:
+SELECT *|{DISTINCT column(s) alias, expression(s) alias,
+group_f-on(s)(col|expr alias), }
+FROM table
+WHERE condition(s)
+GROUP BY {col(s)| expr(s)}
+ORDER BY {col(s)| expr(s)| numeric position}
+{ASC| DESC}{NULLS FIRST|LAST};
+
+Примеры:
+select department_id, count(*) from employees group by department_id order by 1, 2; // возвращает количество работников для каждого департамента
+
+select department_id, count(*), min(salary) from employees group by department_id order by 1, 2; // возвращает количество работников и минимальную зп 
+для каждого департамента
+
+select job_id, min(salary), max(salary) from employees group by job_id; // возвращает мин и мах зп для каждой должности
+
+select job_id, round(avg(salary)), min(salary), max(salary) 
+from employees 
+where length(first_name) > 4 and salary > 5000
+group by job_id
+order by job_id, avg(salary);
+
+select to_char(hire_date, 'Month'), count(*) from employees
+group by to_char(hire_date, 'Month'); // возвращает количество работников принятых в месяц года
+
+select department_id, job_id, count(*) from employees
+group by department_id, job_id; // группировка по двум столбцам
+
+select job_id, to_char(hire_date, 'yyyy') year, commission_pct, count(*), sum(salary)
+from employees
+where job_id in ('ST_CLERK', 'SA_REP', 'SH_CLERK') and employee_id > 115
+group by job_id, to_char(hire_date, 'yyyy'), commission_pct
+order by job_id, year;
+
+==================================================================HAVING================================================================================
+Общий шаблон:
+SELECT *|{DISTINCT column(s) alias, expression(s) alias,
+group_f-on(s)(col|expr alias), }
+FROM table
+WHERE condition(s)
+GROUP BY {col(s)| expr(s)}
+ORDER BY {col(s)| expr(s)| numeric position}
+HAVING group_condition(s)
+{ASC| DESC}{NULLS FIRST|LAST};
+
+Примеры:
+select department_id, count(*) from employees
+where length(first_name) > 4
+group by department_id
+having count(*) > 3
+order by department_id;
+
+select department_id, count(*), round(avg(salary)) from employees
+where length(first_name) > 4
+group by department_id
+having count(*) > 3 and round(avg(salary)) > 5000
+order by department_id;
+
+=============================================================NESTED(вложенные) GROUP функции============================================================
+Максимальная глубина вложенности групповых функций = 2, т.к. нет смысла использовать групповую функцию к одному значению у single row - бесконечна
+
+Примеры:
+select sum(avg(salary)) from employees group by department_id; // сумма всех средних зарплат по департаментам
+
+select round(sum(avg(length(upper(last_name)))))
+from employees group by department_id; // внутри групповой функции может быть вложено сколько угодно single raw функций
+
+
+ДЗ
+1) select department_id, min(salary), max(salary), min(hire_date), max(hire_date), count(*) 
+from employees
+group by department_id
+order by count(*) desc;
+
+2) select substr(first_name, 1, 1), count(*) 
+from employees
+group by substr(first_name, 1, 1)
+having count(*) > 1
+order by count(*);
+
+3) select id_department, salary, count(*)
+from employees
+group by id_department, salary;
+
+4) select to_char(hire_date, 'Day'), count(*)
+from employees
+group_by to_char(hire_date, 'Day');
+
+5) select department_id 
+from employees
+group by department_id
+having count(*) > 30 and sum(salary) > 300000;
+
+6) select region_id from countries
+group by region_id
+having sum(length(country_name)) > 50;
+
+7) select job_id, round(avg(salary))
+from employees
+group by job_id;
+
+8) select department_id from employees
+group by department_id
+having count(distinct job_id) > 1;
+
+9) select department_id, job_id, max(salary), min(salary)
+from employees
+group by department_id, job_id
+having avg(salary) > 10000;
+
+10) select manager_id from employees
+where commission_pct is null
+group by manager_id
+having avg(salary) between 6000 and 9000;
+
+11) select round(max(avg(salary)), -3)
+from employees
+group by department_id; 
+
+
+=========================================================================================================================================================
+=========================================================================JOIN============================================================================
+=========================================================================================================================================================
+1) INNER JOIN(NATURAL JOIN)
+2) OUTER JOIN
+3) CROSS JOIN
+
+или
+
+1) EQUIJOIN
+2) NONEQUIJOIN
+
+======================================================================INNER JOIN=========================================================================
+- NATURAL JOIN
+- USING
+- ON
+
+1) NATURAL JOIN - объединяет таблицы по столбцам с одинаковыми именами 
+- если столбцов с одинаковыми именами несколько, то объединение будет по всем этим
+столбцам
+- если столбцы в двух таблицах называются одинаково, но их содержание отличается, то выводятся строки только с одинаковыми названиями столбцов и
+содержанием в них
+- если у столбцов в двух таблицах одинковое название, но разные типы данных, то при объединении будет ошибка
+
+Шаблон:
+select column(s) from table_1 natural join table_2;
+
+Примеры:
+select * from regions natural join countries;
+
+select c.country_name, c.country_id, r.region_name, region_id 
+from regions r natural join countries c; // c region_id нельзя использовать alias таблицы т.к. столбец является общим для двух таблиц
+
+select first_name, last_name, salary, department_name, department_id, manager_id
+from employees natural join departments; // объединение таблиц по 2 столбцам
+
+2) NATURAL JOIN with USING
+- в отличие от NATURAL JOIN можно указать по каким столбцам необходимо провести объединение
+- если в таблицах, которые мы хотим объединить есть 2 столбца с одинаковым именем, а объединяем мы только по одному, то необходимо указать из какой 
+таблицы будет взят второй столбец(используя полное имя столбца employees.manager_id или используя alias таблицы)
+
+Шаблон:
+select column(s) from table_1 join table_2 using (colum(s));
+
+Примеры:
+select first_name, last_name, salary, department_name, e.manager_id, department_id
+from employees e join departments d using (department_id);
+
+select first_name, last_name, jh.job_id, start_date, end_date
+from employees join job_history jh using (employee_id);
+
+select first_name, last_name, jh.job_id, start_date, end_date
+from employees join job_history jh using (employee_id, department_id);
+
+3) NATURAL JOIN with ON
+- в отличие от NATURAL JOIN и JOIN with USING, данный JOIN может объединять таблицы по столбцам с разным названием
+- можно объединять таблицы по нескольким столбцам
+
+Шаблон:
+select column(s) from table_1 join table_2 on (column1 = column2);
+
+Примеры:
+select * from employees join job_history jh on (employees.employee_id = jh.employee_id);
+
+select * from departments join regions on (region_id = department_id); // пересечний нет т.к. столбцы содержат разную инфу
+
+select * from employees e join job_history jh on
+(e.employee_id = jh.employee_id and e.department_id = jh.department_id); // если строки в указнных столбцах имеют одинаковые значения, то происходит
+объединение
+
+select first_name, department_name from employees join departments
+on (employees.employee_id = departments.manager_id);
+
+=========================================================Обединение более двух таблиц====================================================================
+select * from locations natural join countries natural join regions; // сначала объединятся таблицы locations и countries, затем результирующая таблица 
+объединяется с таблицей regions
+
+select * from locations natural join countries using (country_id) natural join regions using (region_id);
+
+select first_name, last_name, jh.job_id, start_date, end_date, department_name
+from employees e join job_history jh on (e.employee_id = jh.employee_id)
+join departments d on (jh.department_id = d.department_id);
+
+select first_name, last_name, jh.job_id, start_date, end_date, department_name
+from employees e join job_history jh using (employee_id)
+join departments d on (jh.department_id = d.department_id);
+
+================================================================NONEQUIJOIN with ON======================================================================
+Объединение таблиц с помощью неравенств
+
+Шаблон:
+select column(s) from table_1 join table_2 on (column1 {оператор неравенства} column2);
+
+Примеры:
+select first_name, salary, min_salary, max_salary
+from employees e join jobs j on (e.job_id = j.job_id and salary*2 < max_salary);
+
+select first_name, salary, min_salary, max_salary
+from employees e join jobs j on (e.job_id = j.job_id and salary between min_salary + 2000 and max_salary - 3000);
+
+======================================================================SELF JOIN==========================================================================
+- реализован на основе JOIN ON
+- объединение таблицы с самой собой (например таблица employee, где есть столбцы employee_id и manager_id, менеджер является работником и его данные 
+содержатся в этой же таблице в столбце employee_id)
+
+Пример:
+select emp1.employee_id, emp1.first_name, emp1.manager_id, emp2.first_name manager_name
+from employees emp1 join employees emp2 on (emp1.manager_id = emp2.employee_id);
+
+======================================================================OUTER JOIN=========================================================================
+- LEFT OUTER JOIN - выполняется INNER JOIN, а затем из левой таблицы добавляются строки не соответствующие условиям объединения
+- RIGHT OUTER JOIN - выполняется INNER JOIN, а затем из правой таблицы добавляются строки не соответствующие условиям объединения
+- FULL OUTER JOIN - выполняется INNER JOIN, а затем из левой и из правой таблицы добавляются строки не соответствующие условиям объединения
+
+
+1) LEFT OUTER JOIN
+Шаблон:
+select column(s) from table_1 left outer join table_2 on (column1 = column2);
+
+Примеры:
+select first_name, last_name, salary, department_name
+from employees e left outer join departments d on (e.department_id = d.department_id);
+
+select first_name, salary, min_salary, max_salary
+from employees e left outer join jobs j on (e.job_id = j.job_id and salary*2<max_salary);
+
+select department_name, d.department_id, first_name
+from departments d left outer join employees e
+on (e.department_id = d.department_id) 
+where first_name is null // возвращает департаменты в которых нет работников
+
+2) RIGHT OUTER JOIN
+Шаблон:
+select column(s) from table_1 right outer join table_2 on (column1 = column2);
+
+Примеры:
+select country_name, city, street_adress from locations l
+right outer join countries c on (l.country_id = c.country_id);
+
+3) FULL OUTER JOIN
+Шаблон:
+select column(s) from table_1 full outer join table_2 on (column1 = column2);
+
+Примеры:
+select first_name, last_name, salary, department_name
+from employees e full outer join departments d 
+on (e.department_id = d.department_id);
+
+=======================================================================CROSS JOIN=======================================================================
+каждая строка из первой таблицы объединяется с каждой строкой из второй таблицы (1 строка из первой таблицы со всеми строками из 2), 
+без указания условий объединения
+
+Шаблон:
+select column(s) from table_1 CROSS JOIN table_2;
+
+Примеры:
+select * from countries cross join regions
+where countries.region_id >= 2
+order by country_id;
+
+=======================================================================ORACLE JOIN=======================================================================
+1) INNER JOIN
+Шаблон:
+select column(s) from table_1 t1, table_2 t2 where t1.column1 = t2.column2;
+
+Шаблон для объединения нескольких таблиц:
+select column(s) from table_1 t1, table_2 t2, table_3 t3, table_n tn where t1.column1 = t2.column2 and t2.column = t3.column and t3.column = tn.column;
+
+2) RIGHT OUTER JOIN
+Шаблон:
+select column(s) from table_1 t1, table_2 t2 where t1.column1 (+) = t2.column2;
+
+3) LEFT OUTER JOIN
+Шаблон:
+select column(s) from table_1 t1, table_2 t2 where t1.column1 = t2.column2 (+);
+
+3) CROSS JOIN
+Шаблон:
+select column(s) from table_1 t1, table_2 t2;
+
+Примеры:
+select nvl(region_name, 'no region'), count(*) from employees e, departments d, locations l, countries c, regions r 
+where e.department_id = d.department_id (+) and d.location_id = l.location_id (+) and l.country_id = c.country_id (+) and c.region_id = r.region_id (+)
+group by region_name;
+
+
+ДЗ
+
+select nvl(region_name, 'no region'), count(*) from employees e 
+left join departments d on e.department_id = d.department_id
+left join locations l on d.location_id = l.location_id
+left join countries c on l.country_id = c.country_id
+left join regions r on c.region_id = r.region_id
+group by region_name;
+
+select first_name, last_name, department_name, job_id, street_address, country_name, region_name 
+from employees e 
+left join departments d on e.department_id = d.department_id
+left join locations l on d.location_id = l.location_id
+left join countries c on l.country_id = c.country_id
+left join regions r on c.region_id = r.region_id;
+
+select e2.first_name manager_name, count(*) from employees e1
+join employees e2 on e1.manager_id = e2.employee_id
+group by e2.first_name
+having count(*) > 6;
+
+select department_name, count(*) from employees e
+join departments d on e.department_id = d.department_id
+group by department_name
+having count(*) > 30;
+
+select department_name from employees e
+right join departments d on e.department_id = d.department_id
+where employee_id is null;
+
+select e1.first_name from employees e1
+join employees e2 on e1.manager_id = e2.employee_id
+where to_char(e2.hire_date, 'yyyy') = '2000' and e1.hire_date < to_date('2000', 'yyyy');
+
+select country_name, region_name from countries
+natural join regions;
+
+select first_name, last_name, salary from employees e 
+join jobs j on e.job_id = j.job_id
+where salary < min_salary + 1000;
+
+select distinct first_name, last_name, country_name from employees e 
+full join departments d on e.department_id = d.department_id
+full join locations l on d.location_id = l.location_id
+full join countries c on l.country_id = c.country_id;
+
+select first_name, last_name, country_name from employees
+cross join countries;
+
+select nvl(region_name, 'no region'), count(*) from employees e, departments d, locations l, countries c, regions r 
+where e.department_id = d.department_id (+) and d.location_id = l.location_id (+) and l.country_id = c.country_id (+) and c.region_id = r.region_id (+)
+group by region_name;
+
+select department_name from employees e, departments d 
+where e.department_id (+) = d.department_id and employee_id is null;
+
+
+=========================================================================================================================================================
+==================================================================SUBQUERY (подзапрос)===================================================================
+=========================================================================================================================================================
+- подзапрос должен быть записан в скобках, иначе будет возвращена ошибка
+- подзапрос срабатывает до основного запроса(selecta)
+
+Виды:
+1) SINGLE ROW - возвращает одну строку
+- SCALAR - возвращает одну строку и один столбец(одно значение)
+2) MULTIPLE ROW - возвращает несколько строк
+
+Примеры:
+select first_name, last_name, salary
+from employees where salary > (select avg(salary) from employees); // с помощью подзапроса сравниваем зп каждого сотрудника со средней зп всех сотрудников
+
+select (select min(min_salary) from jobs), (select max(length(first_name)) from employees) from dual;
+
+select first_name, last_name from employees
+where employee_id in (select manager_id from employees); // возвращает имена менеджеров
+
+select department_name, min(salary), max(salary) from
+(select salary, department_name from employees e join departments d on e.department_id = d.department_id)
+group by department_name;
+
+select department_name, min(salary), max(salary) from
+(select salary, department_name from employees e join departments d on e.department_id = d.department_id)
+group by department_name
+having max(salary) > (select 2 * 5000 from dual)
+and min(salary) < (select salary from employees where employee_id = 113);
+
+=====================================================================SINGLE ROW SUBQUERY=================================================================
+Примеры:
+select first_name, last_name, salary from employees
+where salary < (select max(salary) / 5 from employees);
+
+select job_title from jobs j join employees e on (j.job_id = e.job_id)
+group by job_title
+having avg(salary) = (select max(avg(salary)) from employees group by job_id);
+
+===================================================================MULTIPLE ROW SUBQUERY=================================================================
+- не использовать оператор NOT IN с подзапросами, которые могут вернуть NULL тк результат основного запроса может быть искажён
+- вместо оператора = используется оператор IN
+- вместо оператора != используется оператор NOT IN
+
+Примеры:
+select first_name, last_name, salary from employees
+where job_id in (select job_id from jobs where min_salary > 8000); // для сравнения используем оператор IN тк он может работать с несколькими значениями
+
+select first_name, last_name, salary from employees
+where job_id not in (select job_id from jobs where min_salary > 8000); // для исключения значений используем оператор NOT IN
+
+select first_name, last_name, salary from employees
+where job_id not in (select job_id from jobs where job_id = 'AD_VP'); // оператор IN может работать со SCALAR значением (один столбец, одна строка)
+
+select first_name, last_name, salary from employees
+where salary > any(select salary from employees where department_id = 100); // оператор any означает, что salary должен быть больше хотя бы одного из
+значений возвращённых подзапросом
+
+select first_name, last_name, salary from employees
+where salary > all(select salary from employees where department_id = 100); // оператор all означает, что salary должен быть больше всех
+значений возвращённых подзапросом
+
+select department_name from departments
+where department_id in (select distinct department_id from employees);
+
+=================================================================CORRELATED SUBQUERIES===================================================================
+Подзапрос, который связан с внешним запросом, т.е. сначала выполняется часть внешнего запроса, а затем подзапрос
+- выполняется для каждой строки таблицы
+- может выполняться очень долго
+
+Пример:
+select e1.first_name, e1.salary from employees e1
+where e1.salary > (select avg(e2.salary) from employees e2 where e2.department_id = e1.department_id); // из основного запроса передаётся значение строки
+e1.department_id, затем подзапрос выполняется для каждой строки основного запроса каждый раз передавая в подзапрос новое значение e1.department_id
+
+===============================================================ДОП ПРИМЕРЫ НА ПОДЗАПРОСЫ=================================================================
+Иногда проще использовать подзапросы вместо join
+
+1) Найти работников, которые работают в Германии
+
+select first_name from employees where department_id in
+(select departmnet_id from departments where location_id in
+(select location_id from locations where country_id =
+(select country_id from countries where country_name = 'Germany')));
+
+2) Найти менеджеров, которые зарабатывают больше средней зп по всей конторе среди всех работников
+
+select first_name, last_name, salary from employees
+where job_id in (select job_id from jobs where upper(job_title) like '%MANAGER%')
+and salary > (select avg(salary) from employees);
+
+3) Найти работников, которые зарабатывают больше чем David
+
+select first_name, last_name, salary from employees
+where salary > all(select salary from employees where first_name = 'David');
+
+
+ДЗ
+
+Select * from employees where length(first_name) = (select max(length(first_name)) from employees);
+
+Select * from employees where salary > (select avg(salary) from employees);
+
+select city from employees e join departments d on e.department_id = d.department_id
+join locations l on d.location_id = l.location_id
+group by city
+having sum(salary) = 
+(select min(sum(salary)) from employees e 
+join departments d on e.department_id = d.department_id
+join locations l on d.location_id = l.location_id
+group by city);
+
+
+
+select * from employees where manager_id in 
+(select distinct e1.employee_id from employees e1 join employees e2 on e2.manager_id = e1.employee_id where e1.salary > 15000);
+
+select * from departments where department_id in 
+(select d.department_id from employees e right join departments d on e.department_id = d.department_id where first_name is null);
+
+select * from employees where employee_id not in 
+(select distinct e1.employee_id from employees e1 join employees e2 on e2.manager_id = e1.employee_id);
+
+select * from employees where employee_id IN
+(select e1.employee_id from employees e1 join employees e2 on e2.manager_id = e1.employee_id
+group by e1.employee_id 
+having count(*) > 6);
+
+select * from employees where department_id = 
+(select department_id from departments where department_name = 'IT');
+
+select * from employees where manager_id in
+(select distinct e1.employee_id from employees e1 join employees e2 on e2.manager_id = e1.employee_id where to_char(e2.hire_date, 'yyyy') = '2000') and
+hire_date < to_date('01-JAN-2000', 'dd-MON-yyyy');
+
+select * from employees where manager_id in
+(select e1.employee_id from employees e1 join employees e2 on e2.manager_id = e1.employee_id where to_char(e1.hire_date, 'MON') = 'JAN') and
+employee_id in (select employee_id from employees e join jobs j on e.job_id = j.job_id where length(job_title) > 15);
+
+
+=========================================================================================================================================================
+=====================================================================SET OPERATORS=======================================================================
+=========================================================================================================================================================
+1) Количество столбцов в первом и втором select должно быть одинаковым
+2) Столбец в выводе будет называться как столбец из первого select
+3) Типы данных столбцов в первом и втором select должны совпадать
+4) При использовании оператора union к двум столбцам из разных select: 
+|ivan|18| и |ivan|15| => |ivan|15|
+			 |ivan|18|
+5) Операторы set можно использовать с двумя и более select, для изменения приоритета выполнения можно использовать скобки
+
+- UNION - перед объединением отсортирует от меньшего к большему, затем при объединении удалит дубликаты
+- UNION ALL - объединеяет информацию из двух множеств
+- INTERSECT(пересечение) - находит общие значения в множествах, удаляет дубликаты и возвращает общие значения в отсортированном виде от меньшего к большему
+- MINUS(только в oracle) - возвращает строки из первого множества, которых нет во втором множестве, удалит дубликаты и отсортирует от меньшего к большему
+в классическом SQL называется EXCEPT
+
+=========================================================================UNION ALL=======================================================================
+Объединяет 2 аутпут множества в одно простым присоединением
+
+Примеры:
+select * from jobs
+where job_id like '%MAN%'
+	UNION ALL
+select * from jobs
+where job_id like '%MAN%'
+order by 3 desc;
+
+select job_id col_1, max_salary col_2 from jobs
+where job_id like '%MAN%'
+	UNION ALL
+select job_title, min_salary from jobs
+where job_id like '%MAN%'; // столбцы с разной информацией, но одного типа, названия столбцов в выводе будут соответствовать алиасам из первого select
+
+select job_id, job_title, min_salary from jobs
+where job_id like '%MAN%'
+	UNION ALL
+select job_id, job_title, max_salary from jobs
+where job_id like '%MAN%'
+order by min_salary desc; // оператор order by можно применять только к итоговой таблице, поэтому записывается он в конце запроса
+
+select country_id from countries
+union all
+select country_name from countries; // можно объндинить столбцы с разными типами, если они являются одним семейством (integer и numbers, char и varchar2 и тд)
+
+============================================================================UNION========================================================================
+Объединяет 2 аутпут множества в одно, удаляя при этом дубликаты и сортируюя его.
+
+Примеры:
+select * from jobs
+where job_id like '%MAN%'
+	UNION 
+select * from jobs
+where job_id like '%MAN%';
+
+select * from jobs
+where min_salary between 4500 and 8000
+	UNION 
+select * from jobs
+where where max_salary between 10000 and 15000
+order by 3;
+
+======================================================================INTERSECT==========================================================================
+INTERSEKT двух аутупут множеств возвращает только общие строки, удаляя при этом дубликаты и сортируя результат.
+
+Примеры:
+select * from jobs
+where job_id like '%MAN%'
+      INTERSECT 
+select * from jobs
+where job_id like '%MAN%';
+
+====================================================================MINUS(EXCEPT)========================================================================
+MINUS двух аутпут множеств возвращает только те строки, которые есть в первом множестве, но нет во втором, удаляя при этом дубликаты и сортируя результат.
+
+Примеры:
+select * from jobs
+where job_id like '%MAN%'
+      MINUS 
+select * from jobs
+where job_id like '%MAN%';
+
+=============================================================ПРИМЕРЫ НА SET ОПЕРАТОРЫ====================================================================
+select first_name, salary from employees where first_name like '%a%'
+intersect
+select first_name, salary from employees where first_name like '%e%'
+except
+select first_name, salary from employees where first_name like '%l%';
+
+
+select first_name, salary from employees where first_name like '%a%'
+union
+select first_name, salary from employees where first_name like '%e%'
+except
+select first_name, salary from employees where first_name like '%l%';
+
+
+select first_name, salary from employees where first_name like '%a%'
+union
+(select first_name, salary from employees where first_name like '%e%'
+except
+select first_name, salary from employees where first_name like '%l%'); // сначала выполнится set оператор заключённый в скобки
+
+
+select manager_id from employees where department_id = 20
+intersect
+select manager_id from employees where department_id = 30
+minus
+select manager_id from employees where department_id = 40 // сначала возвращает менеджеров работающих в 20 и 30 департаменте, затем вычитает менеджеров
+из 40 департамента
+
+
+select department_id dep_id, to_char(null) job_id, sum(salary) from employees
+group_by department_id
+union
+select to_number(null), job_id, sum(salary) from employees
+group by job_id; // т.к. значения в столбцах department_id и job_id разных типов, то чтобы объединить аутпуты мы создаём псевдо столбцы с нужными типами
+данных и располагаем их в нужном месте, чтобы не было конфликта аутпутов
+
+
+ДЗ
+1) 
+select manager_id, to_char(null) job_id, to_number(null) department_id, sum(salary) from employees
+group by manager_id
+union
+select to_number(null), job_id, to_number(null), sum(salary) from employees
+group by job_id
+union
+select to_number(null), to_char(null), department_id, sum(salary) from employees
+group by department_id;
+
+2)
+select department_id from employees where manager_id = 100
+minus
+(select department_id from employees where manager_id = 145
+union
+select department_id from employees where manager_id = 201);
+
+3)
+select first_name, last_name, salary from employees where first_name like '_a%'
+intersect
+select first_name, last_name, salary from employees where upper(last_name) like '%S%'
+order by salary desc;
+
+4)
+select location_id, postal_code, city from locations l join 
+countries c on l.country_id = c.country_id where country_name in ('Italy', 'Germany')
+union all
+select location_id, postal_code, city from locations l 
+join countries c on l.country_id = c.country_id where postal_code like '%9%';
+
+5)
+select country_id id, country_name country, region_name from countries c 
+join regions r on c.region_id = r.region_id where length(country_name) > 8
+union
+select country_id, country_name, region_name from countries c 
+join regions r on c.region_id = r.region_id where region_name != 'Europe'
+order by country desc;
+
+
+
+=========================================================================================================================================================
+======================================================================DML команды========================================================================
+=========================================================================================================================================================
+DML - data manipulation language
+
+- INSERT - добавляет строки в таблицу
+- UPDATE - обновляет инфо в строках таблицы
+- DELETE - удаляет строки
+- MERGE - объединяет некоторые функции предыдущих комманд 
+
+========================================================================INSERT===========================================================================
+Вставляет новые строки в таблицу
+
+Шаблон:
+INSERT INTO table_name column(s) values(value(s));
+
+Примеры:
+insert into countries values ('SW', 'Sweden', 1);
+
+insert into countries values ('SW', 'Sweden'); // если в запросе не будет дана информация для столбца, то sql выдаст ошибку
+
+insert into countries values (1, 'Sweden', 'SW'); // если типы данных вставляемых значений не будут соответствовать таблице, то sql выдаст ошибку
+
+insert into countries (country_id, country_name, region_id) values ('NR', 'Norway', 1); // указываем названия столбцов, в которые добаляем значения
+
+insert into countries (country_id, country_name) values ('PR', 'Portugal'); // можно вставлять инфо не во все столбцы, в ропущенных столбцах будет null, 
+если столбец может принимать значение null.
+
+insert into countries values ('FL', 'Finland', null); // Если в запросе не указаны названия столбцов, то должны быть указаны все 
+значения(пропусков быть не должно)
+
+If you want to insert multiple rows, you don't have to add them one by one: you can add multiple rows simultaneously.(возможно работает только в mySQL) 
+
+Let's add two more rows to the table customers:
+
+INSERT INTO customers (name, surname, zip_code, city) 
+VALUES ('Mary', 'West', 75201, 'Dallas'), ('Steve', 'Palmer', 33107, 'Miami');
+In this example, we wrote two comma-separated lists of values instead of just one.
+
+==========================================================INSERT с использованием функций================================================================
+Чтобы быть уверненным, что sql правильно поймёт добавляемую нами информацию, необходимо использовать функции
+
+Примеры:
+insert into employees (employee_id, last_name, email, hire_date, job_id)
+values (211, initcap('tregulov'), upper('tregulov'), to_date('18-SEP-2019', 'DD-MON-YYYY'), upper('it_prog'));
+
+=========================================================INSERT с использованием подзапроса==============================================================
+Шаблон:
+INSERT INTO table_name column(s) SUBQUERY;
+
+Примеры:
+create table new_emps
+(
+emp_id integer,
+name varchar2(20),
+start_date date,
+job varchar2(10)
+);
+
+insert into new-emps (emp_id, name, start_date)
+(select employee_id, first_name, hire_date from employees where employee_id > 200);
+
+================================================================INSERT в несколько таблиц================================================================
+create table emps_with_high_salary(
+name varchar(20),
+salary integer
+);
+
+create table emps_with_dept_100(
+name varchar(20),
+salary integer
+);
+
+create table some_emps(
+name varchar(20),
+salary integer
+);
+
+INSERT ALL
+WHEN department_id = 100 THEN
+INTO emps_with_dept_100 VALUES (first_name, salary)
+WHEN salary > 15000 THEN
+INTO emps_with_high_salary (name) VALUES (last_name)
+WHEN 5 = 5 THEN
+INTO some_emps (name, salary) VALUES (first_name, salary)
+SELECT first_name, last_name, salary, department_id FROM employees where LENGTH(first_name) > 5;
+
+===========================================================================UPDATE========================================================================
+Шаблон:
+UPDATE table_name SET column(s) = value(s) where condition(s);
+
+Примеры:
+update employees set salary = 10000 where employee_id = 100;
+
+update employees set salary = 10000, job_id = 'IT_PROG' where employee_id = 100;
+
+update employees set salary = 10000; // если не указать условие, то значение обновится для всех строк указанного столбца
+
+=============================================================UPDATE с использованием подзапросов=========================================================
+Шаблон:
+UPDATE table_name SET column(s) = subquery(s) where column = subquery;
+
+Примеры:
+update employees set salary = 5000 where department_id in
+(select department_id from departments where department_name = 'Marketing');
+
+update employees set salary = (select max(salary) from employees),
+hire_date = (select min(start_date) from job_history)
+where employee_id = 180;
+
+update employees set salary = (select salary from employees where employee_id = 5)
+where employee_id = 181; // для строки с employee_id = 181 столбца salary будет установлено значение null т.к. подзапрос вернул null
+
+=========================================================================DELETE==========================================================================
+Удаляет строку(и) полностью только из одной таблицы
+
+Шаблон:
+DELETE FROM table_name WHERE condition(s);
+
+Примеры:
+delete from new_emps; // удаляет все строки из таблицы new_emps
+
+delete from new_emps where emp_id = 210;
+
+delete from new_emps where job like '%CLERK%' or name is null;
+
+==========================================================DELETE с использованием подзапросов============================================================
+Шаблон:
+DELETE FROM table_name WHERE column = subquery;
+
+Примеры:
+delete from new_emps where job in 
+(select distinct job_id from employees where department_id in
+(select department_id from departments where manager_id = 100));
+
+============================================================================MERGE========================================================================
+Совмещает в себе функции операторов INSERT, UPDATE, DELETE
+
+Шаблон:
+MERGE INTO table_name1 t1
+USING {table_name2|subquery} t2
+ON (t1.column = t2.column)
+WHEN MATCHED THEN
+UPDATE SER column = value
+DELETE where condition
+WHEN NOT MATCHED THEN
+INSERT (column1, column2) VALUES (value1, value2);
+
+Примеры:
+MERGE INTO new_emps ne
+USING employees e
+ON (ne.emp_id = e.employee_id)
+WHEN MATCHED THEN
+UPDATE SET ne.start_date = SYSDATE
+DELETE where ne.job like '%IT%'
+WHEN NOT MATCHED THEN
+INSERT (emp_id, name, start_date, job)
+VALUES (employee_id, last_name, hire_date, job_id);
+
+=======================================================================Принципы ACID=====================================================================
+ATOMICITY - атомарность (или выполняются все команды внутри одной транзакции, или, если одна из команд не выполнена, то откатываются изменения остальных 
+команд)
+CONSISTENCY - согласованность (результат выполнения запроса должен быть согласован с состоянием таблицы на момент выполнения запроса т.е. если во время
+выполненя запроса в таблице произошли изменения, то на результат запроса они не повлияют)
+ISOLATION - изолированность (пока пользователь не завершит транзакцию, другие пользователи не увидят изменения)
+DURABLE - долговечность (если транзакция завершена, то изменения будут видны всем пользователям)
+
+=========================================================================ТРАНЗАКЦИИ======================================================================
+Транзакция начинает своё выполнение при запуске DML команд и завершается после: 
+- COMMIT/ROLLBACK
+- DDL команды (работа с объектами БД, например команда CREATE, ALTER, DROP), причём сначала COMMIT, а затем выполняется DDL команда и после неё снова COMMIT 
+- DCL команды (например команда GRANT), причём сначала COMMIT, а затем выполняется DDL команда и после неё снова COMMIT 
+- выхода из SQL developer или другого тула
+- сессия убита, произошло отключения от БД(транзакция откатится)
+- отключилась БД(транзакция откатится)
+
+===========================================================================COMMIT========================================================================
+COMMIT - TCL команда, которая сохраняет изменения
+
+Можно выполнить с помощью команды "COMMIT;" или с помощью иконки на панели управления в SQL developer
+
+==========================================================================ROLLBACK=======================================================================
+ROLLBACK - TCL команда, которая откатывает изменения до начала транзакции
+
+Шаблон:
+ROLLBACK TO SAVEPOINT savepoint_name; 
+или просто ROLLBACK;
+
+==========================================================================SAVEPOINT======================================================================
+Шаблон:
+SAVEPOINT savepoint_name; 
+
+SAVEPOINT - TCL команда, которая создаёт точку восстановления для ROLLBACK
+
+Примеры:
+insert into new_emps values (1000, 'Igor', sysdate, 'IT_PROG');
+savepoint s1;
+update new_emps set emp_id = 300 where emp_id = 100;
+savepoint s2;
+delete from new_emps where emp_id = 101;
+rollback to savepoint s2; // бд откатится к точке восстановления s2, но транзакция остаётся открытой
+commit; // теперь транзакция закрыта и изменения сохранены
+rollback to savepoint s1; // ошибка т.к. данного savepoint уже не существует
+
+===================================================================SELECT FOR UPDATE=====================================================================
+При использвании SELECT FOR UPDATE для таблицы, ниодна другая сессия(пользователь) не смогут изменить информацию из данного selecta(просматривать
+таблицу можно), пока нами не будет закрыта транзакция
+
+Пример:
+select * from new_emps for update; // другие пользователи не могут изменить данную таблицу, только просматривать
+update new_emps set emp_id = 1500 where emp_id = 104; // выполняем необходимые нам изменения
+commit; // завершаем транзакцию, теперь другим пользователям доступна для изменения данная таблица
+
+
+ДЗ
+1) create table locations2 as (select * from locations where 1 = 2);
+2) 
+insert into locations2 (location_id, street_address, city, country_id) values (800, 'Address', 'Milan', 'IT'); 
+insert into locations2 (location_id, street_address, city, country_id) values (900, 'Address', 'Neapol', 'IT');
+3) commit;
+4) 
+insert into locations2 values (3300, 'Address', '440046', 'Paris', 'Centr', 'FR');
+insert into locations2 values (3400, 'Address', '440047', 'Provance', 'South', 'FR');
+5) commit;
+6) insert into locations2 (select * from locations where length(state_province) > 9);
+7) commit;
+8) create table locations4europe as (select * from locations where 1 = 2);
+9) 
+INSERT ALL
+WHEN 5 = 5 THEN
+INTO locations2 values (location_id, street_address, postal_code, city, state_province, country_id)
+WHEN country_id in (select c.country_id from countries c join regions r on c.region_id = r.region_id where c.region_id = 1) THEN
+INTO locations4europe (location_id, street_address, city, country_id) VALUES (location_id, street_address, city, country_id)
+SELECT * FROM locations;
+10) commit;
+11) Update locations2 set postal_code = '440046' where postal_code is null;
+12) rollback;
+13) Update locations2 set postal_code = (select postal_code from locations where location_id = 2600) 
+where postal_code is null;
+14) commit;
+15) delete from locations2 where country_id = 'IT';
+16) savepoint sv1;
+17) update locations2 set street_address = 'Sezam st. 18' where location_id > 2500;
+18) savepoint sv2;
+19) delete from locations2 where street_address = 'Sezam st. 18';
+20) rollback to savepoint sv1;
+21) commit;
+
+
+==========================================================================================================================================================
+======================================================================DDL команды=========================================================================
+==========================================================================================================================================================
+
+===================================================================Объекты базы данных====================================================================
+1) TABLE
+2) VIEW
+3) SYNONYM
+4) INDEX
+5) SEQUENCE
+
+======================================================================USER и SCHEMA=======================================================================
+USER - лицо, которое может подключиться к БД
+SCHEMA - все объекты БД, которые принадлежат одному USER
+Объект БД не может находится вне SCHEMA и всегда имеет хозяина, поэтому полное название таблицы выглядит так USER.название_объекта или 
+schema_name_object_name
+Чтобы получить доступ к объектам SCHEMA других пользователей, необходимо получить на это права
+Некоторые пользователи создаются при создании БД автоматически(например, SYS и SYSTEM)
+Пользователь SYS является владельцем data_dictionary(совокупность служебных таблиц т.е. названия столбцов, типы данных в них и тд)
+Не стоит изменять data_dictionary с помощью DML команд, изменения в data_dictionary вносятся после применения к объектам DDL команд
+Пользователь SYSTEM является владельцем объектов для администрирования и мониторинга
+
+=======================================================Правила названия объектов и понятие NAMESPACE======================================================
+1) Длина имени объекта от 1 до 30 символов
+2) Объект не может называться зарезервированным словом(например, from, select и тд)
+3) Все имена должны начинаться с буквы
+4) В названии таблицы можно использовать '_', '$', '#'
+5) Прописные буквы в названии таблиц будут конвертированы в заглавные
+
+NAMESPACE - не допускает одинакового названия объектов TABLE, VIEW, SEQUENCE, PRIVATE SYNONYM в одной schema
+Для INDEX свой NAMESPACE, поэтому INDEX может иметь одинаковое название с таблицей
+Для CONSTRAINT свой NAMESPACE 
+Для PUBLIC SYNONYM свой NAMESPACE 
+
+==============================================================Дополнительные типы данных==================================================================
+1) TIMESTAMP WITH TIMEZONE - содержит информацию о часовом поясе
+2) TIMESTAMP WITH LOCAL TIMEZONE - содержит время с локальным часовым поясом(использует текущий часовой пояс)
+3) INTERVAL YEAR TO MONTH - содержит год и количество месяцев
+4) INTERVAL DAY TO SECOND - содержит день, часы, минуты, секунды
+5) CLOB - Character Large Object, содержит большой объём текстовой информации
+6) BLOB - Binary Large Object, содержит фото, видео
+7) LONG - устаревший тип, вместо него используется CLOB
+8) ROWID - id строки, зашифрованный тип, присутствует только в oracle. Можно увидеть, только если обратиться к нему
+select * from rowid, first_name, salary from employees;
+
+=========================================================Простое создание таблиц CREATE TABLE=============================================================
+Шаблон:
+CREATE TABLE schema.table ORGANIZATION HEAP
+(column_name datatype DEFAULT expr,
+column_name datatype DEFAULT expr,
+...);
+
+Примеры:
+create table students(
+student_id integer,
+name varchar2(15),
+start_date date default round(sysdate),
+scholarship number(6, 2),
+avg_score number(4, 2) default 5
+);
+
+======================================================Создание таблиц с использованием subquery===========================================================
+Шаблон:
+CREATE TABLE schema.table AS subquery;
+
+Примеры:
+create table new_emps2 as (select * from employees); // таблица создана и заполнена информацией из таблицы, которую возвратил subquery
+
+create table new_dep as (select department_name, max(salary) max salary, min(salary) min salary from employees e join departments d
+on e.department_id = d.department_id) group by department_name);
+
+create table regions2 as (select * from regions where 5 = 6); // чтобы скопировать структуру и не копировать инфо в создаваемую таблицу, можно 
+использовать ложное условие в подзапросе
+
+==============================================================Изменение таблиц ALTER TABLE================================================================
+Шаблон:
+ALTER TABLE table_name
+ADD (column_name data_type DEFAULT expr);
+
+ALTER TABLE table_name
+MODIFY (column_name data_type DEFAULT expr); // можно изменить тип данных столбца, но это не должно конфликтовать с инфо содержащейся в столбце
+
+ALTER TABLE table_name
+DROP COLUMN column_name;
+
+ALTER TABLE table_name
+RENAME COLUMN column_name1 to column_name2;
+
+ALTER TABLE table_name READ ONLY; // таблицу нельзя изменить, только просмотреть с помощью select и удалить с помощью DROP TABLE
+
+ALTER TABLE table_name
+SET UNUSED COLUMN column_name; // скрывает столбец, полезно т.к. DROP COLUMN может занимать много времени
+ALTER TABLE table_name DROP UNUSED COLUMNS; // удаляет скрытые столбцы
+
+Примеры:
+ALTER TABLE students ADD (course number DEFAULT 3);
+
+ALTER TABLE students MODIFY (avg_score number(5, 3));
+
+ALTER TABLE students MODIFY (start_date date DEFAULT null); // изменяет ранее установленное дефолтное значение
+
+ALTER TABLE students DROP COLUMN scholarship;
+
+ALTER TABLE students RENAME COLUMN student_id to id;
+
+ALTER TABLE students READ ONLY; // теперь таблицу нельзя изменить, только просмотреть с помощью select
+
+=======================================================Опустошение таблиц TRUNCATE TABLE==================================================================
+Шаблон:
+TRUNCATE TABLE schema.table_name; // удаляет все строки из таблицы
+
+Примеры:
+truncate table students;
+
+============================================================Удаление таблиц DROP TABLE====================================================================
+Шаблон:
+DROP TABLE schema.table_name; // полностью удаляет таблицу
+
+Примеры:
+drop table students;
+
+drop table departments; // не получится удалить пока не удалены таблицы, которые ссылаются на данную таблицу
+
+
+ДЗ
+1) create table friends as 
+(select employee_id id, first_name name, last_name surname from employees where commission_pct is not null);
+2) alter table friends add (email varchar2 (20));
+3) alter table friends modify (email varchar2 (20) default 'no_email');
+4) insert into friends (id, name, surname) values (200, 'Dan', 'Smith');
+5) alter table friends rename column id to friends_id;
+6) drop table friends;
+7) create table friends (
+id integer, 
+name varchar(20),
+surname varchar(20),
+email varchar(20),
+salary number(10, 3) default null,
+birthday date default null);
+8) insert into friends values 
+(1, initcap('dan'), initcap('smith'), upper('drkuznetsov'), 1000, to_date('14-MAY-1993', 'dd-MON-yyyy'));
+9) insert into friends (id, name, surname, email) values (2, initcap('oleg'), initcap('popkov'), upper('opopkov'));
+10) commit;
+11) alter table friends drop column salary;
+12) alter table friends set unused column email;
+13) alter table friends set unused column birthday;
+14) alter table friends drop unused columns;
+15) alter table friends read only;
+16) insert into friends (id, name, surname, email) values (3, initcap('sam'), initcap('pupkin'), upper('spupkin'));
+17) truncate table friends;
+18) drop table friends;
+
+=======================================================================CONSTRAINT=========================================================================
+Бизнес правила для построения таблиц в БД.
+
+Виды:
+1) not null
+2) primary key(первичный ключ)
+3) foreign key(значение столбца в таблице зависит от значений столбца другой таблицы)
+4) check(столбец может принимать только заранее определённые значения)
+5) unique(уникальные значения в столбце)
+
+===================================================================UNIQUE CONSTRAINT======================================================================
+Принуждает столбец(цы) содержать только уникальные значения. Исключение - null. Автоматически создаёт INDEX для столбца.
+
+Нельзя добавить constraint unique в столбец, в котором уже имеются дубликаты
+
+Примеры:
+Create table students(
+id number CONSTRAINT st_id_unique UNIQUE, // добавляем constraint unique для столбца id
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+create table faculties(
+id number,
+name varchar2(15)
+);
+
+Create table students(
+id number,
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer,
+CONSTRAINT st_id_unique UNIQUE (id) // второй вариант добавления constraint для столбца id
+);
+
+Create table students(
+id number,
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer,
+CONSTRAINT st_id_unique UNIQUE (id, name) // можно добавить constraint для нескольких столбцов, указав их в скобках. Теперь уникальными должны быть
+значения в столбце id и name одновременно
+);
+
+Create table students(
+id number,
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer,
+UNIQUE (id) // БД поймёт, что мы создаём constraint и сама даст ему имя
+);
+
+Create table students(
+id number UNIQUE, // БД поймёт, что мы создаём constraint и сама даст ему имя
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+alter table students add constraint st_id_unique unique(id); // добавляет constraint в уже существующую таблицу
+
+alter table students add unique(id); // добавляет constraint в уже существующую таблицу и задаёт ему имя автоматически
+
+alter table students modify (id constraint a unique); // добавляет constraint в уже существующую таблицу
+
+alter table students modify (id unique); // добавляет constraint в уже существующую таблицу и задаёт ему имя автоматически
+
+alter table students drop constraint a; // удаляет constraint
+
+=================================================================NOT NULL CONSTRAINT======================================================================
+Не разрешает столбцам содержать значение null. 
+Нельзя создать одновременно для нескольких столбцов, только по отдельности
+Нельзя создать для столбца, в котором есть значение null
+
+Примеры:
+Create table students(
+id number CONSTRAINT st_id_notnull NOT NULL, // добавляем constraint not null для столбца id
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+alter table students modify (course constraint st_course_notnull not null);
+
+Create table students(
+id number CONSTRAINT st_id_notnull NOT NULL, // добавляем constraint not null для столбца id
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer,
+CONSTRAINT st_id_unique UNIQUE(id) // добавляем второй constraint для столбца id
+);
+
+alter table students modify (course null); // удаляет constraint null из столбца
+
+Create table students(
+id numberб
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer,
+CONSTRAINT st_id_notnull NOT NULL // ошибка, constraint not null можно добавить только на inline уровне
+);
+
+alter table students add constraint st_id_unique not null (id); // ошибка, не работает для constraint not null
+
+===================================================================PRIMARY KEY============================================================================
+Принуждает столбец(цы) содержать только уникальные значения и не разрешает содержать значение "null"
+Автоматически создаёт INDEX для столбца
+В таблице не может быть больше одного PRIMARY KEY(но можно добавить отдельно UNIQUE и NOT NULL для столбца, функциональность будет такой же)
+
+Примеры:
+Create table students(
+id number CONSTRAINT st_id_primarykey PRIMARY KEY, // добавляем constraint PRIMARY KEY для столбца id
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+Create table students(
+id number,
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer,
+CONSTRAINT st_id_primarykey PRIMARY KEY(id) // добавляем constraint PRIMARY KEY для столбца id
+);
+
+alter table students modify (id CONSTRAINT st_id_primarykey PRIMARY KEY);
+
+alter table students add id CONSTRAINT st_id_primarykey PRIMARY KEY (id);
+
+=========================================================================FOREIGN KEY======================================================================
+Принуждает использовать только значения из определённого столбца таблицы-родителя или значение "null"
+Например, столбец department_id из таблицы employees может использовать значения из столбца department_id в таблице departments. Таблица departments в 
+данном случае является таблицей-родителем для таблицы employees. department_id в таблице departments должен быть UNIQUE или PRIMARY KEY.
+
+Примеры:
+create table faculties(
+id number constraint constr_id_primarykey primary key, // добавляем constraint primary key для столбца id 
+name varchar2(15)
+);
+
+Create table students(
+id number, 
+name varchar2(15),
+course number,
+faculty_id integer CONSTRAINT st_faculty_id_foreignkey REFERENCES faculties(id), // добавляем foreign key на столбец id  в таблице faculties
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+Create table students(
+id number, 
+name varchar2(15),
+course number,
+faculty_id integer, 
+avg_score number(5, 2),
+start_date date,
+scholarship integer,
+CONSTRAINT st_faculty_id_foreignkey FOREIGN KEY(faculty_id) references faculties(id) // добавляем foreign key на столбец id  в таблице faculties
+;)
+
+Create table students(
+id number, 
+name varchar2(15),
+course number,
+faculty_id integer, 
+avg_score number(5, 2),
+start_date date,
+scholarship integer,
+CONSTRAINT st_faculty_id_foreignkey FOREIGN KEY(faculty_id) references faculties // если не указать столбец таблицы-родителя, то будет ссылаться на
+столбец с PRIMARY KEY из таблицы-родителя
+);
+
+alter table students modify (CONSTRAINT st_faculty_id_foreignkey faculty_id references faculties(id));
+
+alter table students add CONSTRAINT st_faculty_id_foreignkey FOREIGN KEY(faculty_id) references faculties(id);
+
+===========================================================Опции ON DELETE для FOREIGN KEY================================================================
+Нельзя удалить информацию из столбца таблицы - родителя, на которую ссылается информация из столбца - ребёнка с foreign key
+
+Примеры:
+create table faculties(
+id number constraint constr_id_primarykey primary key, // добавляем constraint primary key для столбца id 
+name varchar2(15)
+);
+
+Create table students(
+id number, 
+name varchar2(15),
+course number,
+faculty_id integer CONSTRAINT st_faculty_id_foreignkey REFERENCES faculties(id) ON DELETE CASCADE, // добавляем foreign key на столбец id в таблице 
+faculties. Благодаря добавлению ON DELETE CASCADE, когда будет удаляться строка на котрую мы ссылаемся, то будет удаляться сначала строка из таблицы 
+students, а затем строка из таблицы faculties
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+Create table students(
+id number, 
+name varchar2(15),
+course number,
+faculty_id integer CONSTRAINT st_faculty_id_foreignkey REFERENCES faculties(id) ON DELETE SET NULL, // добавляем foreign key на столбец id в таблице 
+faculties. Благодаря добавлению ON DELETE SET NULL, когда будет удаляться строка на котрую мы ссылаемся, то будет сначала устанавливаться значение null 
+в столбце из таблицы students, а затем удаляться строка из таблицы faculties
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+================================================================CHECK CONSTRAINT==========================================================================
+Принуждает использовать только значения, которые удовлетворяют его условию(ям)
+
+Примеры:
+Create table students(
+id number CONSTRAINT st_id_check CHECK (id > 0 and id < 100), // добавляем constraint CHECK для столбца id
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+Create table students(
+id number, 
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer, 
+CONSTRAINT st_id_check CHECK (course > id) // на table уровне в условии можно использовать столбец
+);
+
+Create table students(
+id number CONSTRAINT st_id_check CHECK (id > course), // на line уровне нельзя использовать столбец в условии!
+name varchar2(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+alter table students modify (id constraint st_id_check CHECK (id >= 1);
+
+alter table students add constraint st_id_check CHECK (id >= 1);
+
+Create table students(
+id number,
+name varchar2(15),
+email varchar(15) CONSTRAINT st_email_check CHECK (INSTR(email, '@',) > 0), // в столбец можно добавить email, если в нём есть символ @
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+======================================================================INDEX B-TREE========================================================================
+Индекс по умолчанию(если не указать тип индекса при создании)
+Индексы очень сильно замедляют работу DML команд
+Индексы ускоряют работу select команд
+Индексы автоматически создаются при добавлении CONSTRAINT UNIQUE и CONSTRAINT PRIMARY KEY
+
+Ограничения INDEX B-TREE:
+1) эффективен когда в таблице много строк(если строк мало, то индекс может игнорироваться и будет выполнен full scan)
+2) используется, когда в аутпуте запроса количество строк значительно меньше(2-4 %) по сравнению с количеством строк в таблице(иначе будет выполнен full scan)
+3) в столбце должно быть много уникальных значений
+
+Шаблон:
+CREATE {UNIQUE | BITMAP} INDEX schema.index_name ON schema.table_name (column1, column2, ...);
+
+DROP INDEX schema.index_name;
+
+Примеры:
+Create table students(
+id number,
+name varchar2(15),
+email varchar(15),
+course number,
+faculty_id integer,
+avg_score number(5, 2),
+start_date date,
+scholarship integer
+);
+
+CREATE INDEX in1 ON students(id); // добавляем индекс B-TREE NON UNIQUE(т.к. не указан тип индекса в запросе) в столбец id таблицы students
+
+CREATE UNIQUE INDEX in2 ON students(id); // добавляем индекс B-TREE UNIQUE(если в столбце присутствуют неуникальные значения, то будет ошибка)
+
+CREATE INDEX in3 ON students(id, name); // добавляем индекс B-TREE NON UNIQUE для двух столбцов
+
+=====================================================================INDEX BITMAP=========================================================================
+Используется для столбцов где есть малое количество повторяющихся значений, например, столбец, где указан пол. Для bitmap такой столбец будет выглядеть 
+следующим образом:
+Мужской пол (1 - в двоичной системе), женский (0 - в двочиной системе). В итоге комбинация значения для мужского пола может выглядеть так: 10101. Для
+женского так: 01010. т.е. 1 - true (искомое значение), а 0 - false. Если уникальных типов значений в столбце 3 и больше, то искомое значение будет 1, а 
+остальные 0.
+В отличие от B-TREE работает с null.
+ORACLE STANDART EDITION не поддерживает INDEX BITMAP
+
+Шаблон:
+CREATE {UNIQUE | BITMAP} INDEX schema.index_name ON schema.table_name (column1, column2, ...);
+
+DROP INDEX schema.index_name;
+
+Примеры:
+CREATE BITMAP INDEX b_ind1 ON students(faculty_id);
+
+ДЗ
+1) 
+create table address (
+id integer constraint ad_id_un unique,
+country varchar2(15),
+city varchar2(15)
+);
+
+2) 
+create table friends (
+id integer,
+name varchar2(15),
+email varchar2(15),
+address_id integer constraint ad_id_fk references address(id) on delete set null,
+birthday date,
+constraint name_check check (length(name) > 3)
+);
+
+3)
+create unique index friends_id_unique_index on friends(id);
+
+4) 
+alter table friends add constraint fr_id_pk (id);
+
+5)
+create index fr_email_in on friens(email);
+
+6)
+alter table friends modify(email constraint fr_email_nn not null);
+
+7) drop table friends;
+8) drop table address;
+
+
+==============================================================================VIEW========================================================================
+view - оутпут selecta сохранённый в качестве таблицы с именем указывающем на неё.
+При изменении simple view с помощью DML команд, изменения отображаются и в таблице на основе которой создан view
+view необходим для защиты информации от лишних глаз
+view и таблицы находятся в одном пуле имён, поэтому не могут называться одинаково
+
+Виды:
+-simple(можно применять DML команды)
+	- одна таблица
+	- без функций
+	- без агрегации
+-complex(нельзя применять DML команды, но есть исключения)
+	- можно использовать JOIN
+	- можно использовать функции
+	- можно использовать агрегацию
+
+Шаблон:
+CREATE OR REPLACE {FORCE | NOFORCE} VIEW // OR REPLACE использутся в случае изменения существующего view // FORCE создаст таблицу со столбцом, которого не существует
+schema.view_name (alias1, alias2, ...) // позволяет дать название столбцам во view
+AS subquery
+WITH CHECK OPTION {CONSTRAINT constraint_name} // предотвращает добавление строк, которые не могут быть отображены во view
+WITH READ ONLY {CONSTRAINT constraint_name}; // запрещает использовать DML команды
+
+CONSTRAINT constraint_name в данном случае не имеет ничего общего с constraint, он просто позволяет дать название WITH CHECK OPTION и WITH READ ONLY
+
+Примеры:
+create or replace view fin_emp2 as select * from students; // изменяет существующий view fin_emp2, если данного view не существует, то он будет создан
+
+create FORCE view v201 as select * from abracadabra; // таблицы abracadabra не существует, с помощью ключевого слова FORCE view всё равно создастся. 
+Но если обратиться к view, то будет ошибка. view станет доступным после того как будет создана таблица на которую он ссылается
+
+create view v202 as select * from students where course > 2;
+insert into v202 values (7, 'Katya', 1); // Katya не будет отображаться во view т.к. её course = 1, но будет добавлена в таблицу students
+
+create view v202 as select * from students where course > 2 with check option;
+insert into v202 values (7, 'Katya', 1); // при добавлении Katya будет ошибка т.к. установлен check option на view
+
+create view v202 as select * from students with read only; // запрещает использовать DML команды для данной view
+
+create view v202 (a, b, c) as select * from students; // a, b, c - даём название столбцам во view
+
+==============================================================ALTER VIEW и DROP VIEW======================================================================
+Шаблон:
+ALTER VIEW schema.view_name COMPILE; // позволяет скомпилировать view вручную. Например, при создании view на основе несуществующего столбца или таблицы, 
+после того как столбец или таблица будут созданы можно скомпилировать view с помощью данной команды. Можно обойтись и без неё т.к. перед вызовом view
+компиляция происходит автоматически.
+
+DROP VIEW schema.view_name;
+
+=====================================================================SYNONYM==============================================================================
+Алтернативное имя объекта, обычно используется для таблиц и view
+Если установить синоним, то по имени синонима к таблице смогут обратиться любые пользователи из других схем и других БД(если у них есть доступ к БД и таблице)
+Для создания и удаления synonym необходимо получить права
+
+Виды:
+- private - находятся в пуле имён с таблицами и view, чтобы обратиться из другой схемы необходимо указать имя схемы в которой находится synonym
+- public - находится в отдельном пуле имён, название схемы при обращении указывать не нужно
+
+Шаблон:
+CREATE PUBLIC SYNONYM synonym_name FOR object_name; // если не указать PUBLIC, то создастся private synonym
+
+DROP PUBLIC SYNONYM synonym_name;
+
+ALTER PUBLIC SYNONYM synonym_name COMPILE; // компилирует synonym, если таблица на которую он ссылался была удалена, а затем снова создана. Также выполняется
+автоматические при вызове synonym после пересоздания таблицы
+
+Примеры:
+create synonym syn1 for students;
+
+create public synonym syn1 for students; // public synonym создался в отдельном пуле. Если вызвать синоним syn1, то сначала БД будет искать private
+synonym и если не найдёт, то будет искать public synonym
+
+=======================================================================SEQUENCE===========================================================================
+Необходим для генерации уникальных последовательностей чисел, незаменим для PRIMARY KEY
+Независим от сессий пользователей, rollback, commit
+
+Шаблон:
+CREATE SEQUENCE schema.sequence_name // при создании без доп функций создастся последовательнсоть 1,2,3,4,5,....
+INCREMENT BY number // позволяет указать на сколько будет увеличено следующее число в последовательности(можно указать отрицательное число), если 3, то 1,4,7,10,...
+START WITH number // позволяет указать с какого числа начинается последовательность
+{MAXVALUE number | NOMAXVALUE} // позволяет указать максимальное число в последовательности
+{MINVALUE number | NOMINVALUE} // необходим для работы с отрицательным increment
+{CYCLE | NOCYCLE} // позволяет использовать цикл при генерации последовательности(если указать maxvalue = 4, то цикл будет 1,2,3,4,1,2,3,4,1,...), новая итерация всегда начинается с 1
+{CACHE number | NOCACHE}; // заранее генерирует числа в последовательности, ускоряет создание последовательности т.к. числа заранее сгенерированы
+
+ALTER SEQUENCE schema.sequence_name
+INCREMENT BY number
+{MAXVALUE number | NOMAXVALUE}
+{MINVALUE number | NOMINVALUE}
+{CYCLE | NOCYCLE}
+{CACHE number | NOCACHE};
+
+DROP SEQUENCE schema.sequence_name;
+
+Примеры:
+create sequence s1;
+
+select s1.nextval from dual; // возвращает следующее значение последовательноcти
+select s1.currval from dual; // возвращает текущее значение последовательности для текущей сессии(можно использовать, если хотя бы раз был вызван nextval)
+
+create table students (
+id integer,
+name varchar2(25),
+course number,
+faculty_id integer
+);
+
+create table faculties(
+id integer,
+name varchar2(15)
+);
+
+create sequence seq_st;
+create sequence seq_faculty start with 20 increment by 5;
+
+insert into faculties values(seq_faculty.nextval, 'IT');
+insert into students values(seq_st.nextval, 'Dan', 3, seq_faculty.currval);
+insert into faculties values(seq_faculty.nextval, 'Marketing');
+insert into students values(seq_st.nextval, 'Max', 2, seq_faculty.currval);
+
+ДЗ
+1)
+create table emp1000 as (select first_name, last_name, salary, department_id from employees);
+2)
+create view v1000 as (select e.first_name, e.last_name, e.salary, d.department_name, d.city  from 
+(SELECT * FROM departments d join locations l on d.location_id = l.location_id) d join employees e on d.department_id = e.department_id);
+3)
+alter table emp1000 add (city varchar2(20));
+4)
+alter view v1000 compile;
+5)
+create synonym syn1000 for v1000;
+6)
+drop view v1000;
+7)
+drop synonym syn1000;
+8)
+drop view emp1000;
+9)
+create sequence seq1000 start with 12 increment by 4 maxvalue 200 cycle;
+10)
+alter sequence seq1000 nomaxvalue nocycle;
+11)
+insert into employees (employee_id, last_name, email, hire_date, job_id) 
+values (seq1000.nextval, 'Smith', 'DSmith', '14-MAY-1993', 'IT_PROG'); 
+12)
+commit;
+
+===========================================================SINGLE AMPERSAND SUBSTITUTION (&)===============================================================
+Необходим при частом использовании типичной команды. Часть информации в запросе можно заменить переменной &name(например &ID) и тогда при запуске команды
+ORACLE спросит какое значение подставить вместо данной переменной
+
+Примеры:
+select * from employees where employee_id = &ID;
+
+select * from employees where first_name = '&name'; // если в столбце текстовое значение, то можно окружить переменную одинарными кавычками, чтобы не 
+добавлять их при запросе значения переменной
+
+select * from employees where first_name = '&name' and salary = &sal; // можно использовать несколько переменных, oracle спросит их поочерёдно
+
+===========================================================DOUBLE AMPERSAND SUBSTITUTION (&&)==============================================================
+Необходим, если в запросе одна и тажа переменная используется несколько раз. Позволяет один раз ввести значение переменной для всего запроса, а не 
+запрашивать значение при каждой встрече переменной в запросе. && достаточной добавить для одной переменной, в остальных добавить &. Значение переменной 
+сохраняется для текущей сессии пользователя, поэтому впоследствии oracle не будет спрашивать её значение.
+
+Примеры:
+select * from employees where first_name like '%&&bukva%' and last_name like '%&bukva%'; // oracle запросит одно значение для обеих переменных
+
+select first_name, last_name, &col from employees;
+
+select first_name, last_name, &col from employees order by &col2;
+
+select &select_list from &table_name where &conditions order by &col;
+
+update students set &col = &value where &condition;
+
+==================================================================DEFINE и UNDEFINE========================================================================
+UNDEFINE - необходим для сброса значения переменной с двойным &&
+UNDEFINE name;
+
+DEFINE - позволяет вывести значения переменных в текущей сессии пользователя. 
+DEFINE;
+
+DEFINE name = новое_значение; // позволяет изменить значение переменной с двойным &&
+
+set define off; // после ввода данной команды oracle перестаёт запрашивать значения для переменных
+set define on; // включает запрос значения для переменных
+
+
+
+
+MS SQL
+
+timediff(time_1, time_2) -> разница во времени в формате HH:MM:SS
+datediff(date_1, date_2) -> разница между датами
+CURRENT_TIMESTAMP - текущая дата
+sysdate() - текущая дата
+
+SELECT * FROM Trip
+WHERE TIMESTAMP(time_out) BETWEEN '1900-01-01T10:00:00.000Z' AND '1900-01-01T14:00:00.000Z';
+
+SELECT COUNT(classroom) count from Schedule 
+where YEAR(DATE) = 2019 and MONTH(DATE) = 9 and DAy(date) = 2;
+
+ifnull аналог nvl в oracle
+
+
+Postgree SQL
+
+now() - текущее время на сервере
+upper() - изменение регистра
+|| или concat() - конкатенация (можно использовать больше двух значений)
+
++ - сложение;
+- - вычитание;
+* - умножение;
+/ - деление;
+% - остаток от деления;
+^ - возведение в степень;
+! - факториал;
+abs - модуль числа;
+sqrt - квадратный корень.
+
+SELECT *
+  FROM employee
+ WHERE NOT (
+         rank_id = 'CHIEF' 
+      OR rank_id = 'DIRECTOR')
+
+Чтобы найти в строке буквальное вхождение знака процента или подчёркивания, перед соответствующим символом в шаблоне нужно добавить спецсимвол. По умолчанию в качестве 
+спецсимвола выбрана обратная косая черта \, но с помощью предложения ESCAPE можно выбрать и другой. Чтобы включить спецсимвол в шаблон поиска, продублируйте его. Синтаксис 
+LIKE с указанием спецсимвола:
+
+строка LIKE шаблон ESCAPE спецсимвол
+например
+
+'_asdfa' LIKE '$_asd%' ESCAPE '$'
+Вместо LIKE можно использовать ключевое слово ILIKE, чтобы поиск был регистр-независимым с учётом текущей языковой среды.
+
+В дополнение к LIMIT можно пропустить определенное количество строк из результата запроса. Для этого после предложения LIMIT нужно написать OFFSET и сколько строк пропустить.
+
+Например, получим магазины с 4 по 6 в алфавитном порядке:
+
+SELECT store_id, name
+  FROM store
+ ORDER BY name
+ LIMIT 3
+OFFSET 3

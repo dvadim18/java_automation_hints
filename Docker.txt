@@ -1,0 +1,61 @@
+--help - применим к любой команде, показывает документацию
+docker version - версия
+docker build <file_name> - создание образа из файла с инструкцией
+docker build .
+docker build -t <tag>:<version> . - задать тэг и версию для создаваемого образа
+docker build -t <имя_образа> <путь_до_папки_с_dockerfile>
+
+docker image ls - список всех образов
+docker pull <image_name> - скачать образ из docker hub
+docker push repository_name/<tag>:<version> - залить образ в docker hub
+docker images - список образов на компьютере
+docker rmi <image_id> <image_id> - удалить указанные образы
+docker image prune - удалить все неиспользуемые образы
+docker tag <old_image_name> <new_image_name> - создать копию образа с новым именем
+
+docker run <image_id or image_name> - запуск контейнера
+docker run -it <image_id or image_name> - интерактивный запуск контейнера(оказываемся внутри запущенного контейнера)
+docker run -p <local_port>:<port_in_container> <image_id or image_name> - запуск контейнера с указанием портов
+docker run -d <image_id or image_name> - не блокирует текущий терминал и позволяет с ним работать
+docker run --name <container_name> <image_id or image_name> - задать имя контейнеру
+docker run --rm <image_id or image_name> - после остановки контейнера, он будет удалён
+docker run -e <var_name> -e <var_name> ... - задаём значение переменной(ых)
+docker run --env-file <./config/.env> - указываем property file с переменными
+docker run -v <volume_name>:<path> - создать локальную папку на машине, в которую контейнер будет сохранять данные
+docker run -d --name <имя_контейнера> -p <порт_на_хосте>:<порт_в_контейнере> -v <папка_на_хосте>:<папка_в_контейнере> <имя_образа>
+.exit - выйти из интерактивно запущенного контейнера
+
+docker stop <container_id> - остановить контейнер
+docker kill -sHUP <имя_контейнера> - перечитать конфигурационный файл
+docker start <container_id> - запустить контейнер
+
+docker ps -a - показать список всех контейнеров
+docker rm <container_id> <container_id> - удалить контейнер(ы)
+docker rm -f <имя_контейнера> - остановить и удалить контейнер
+docker container prune - удалить все незапущенные контейнеры
+
+docker attach <id_of_active_container> - перейти внутрь запущенного контейнера
+docker exec -it <имя_контейнера> /bin/sh - зайти внутрь контейнера
+
+docker logs <container_id> - посмотреть логи контейнера
+
+docker volume ls - посмотреть список баз данных контейнеров
+docker volume inspect <volume_name> - посмотреть что храниться внутри базы данных
+
+Строение Dockerfile
+
+FROM <image_name> - если локально образа нет, то будет скачен
+
+WORKDIR /app - место, где будут храниться файлы в контейнере
+
+COPY . . - список файлов, которые будут скопированы в контейнер(первая . - корень текущего проекта, вторая . - корень в контейнере)
+
+ENV PORT 4200 - задаём системную переменную
+
+RUN npm install - запуск приложения во время построения образа в контейнере
+
+EXPOSE 3000($PORT - если переменная задана ранее) - выставление порта наружу
+
+VOLUME ["/app/data"] - папка в которой можно хранить данные из контейнера на локальной машине(данные сохранятся после удаления контейнера)
+
+CMD ["node", "app.js"] - запуск приложения, когда образ уже построен

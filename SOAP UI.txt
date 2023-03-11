@@ -1,0 +1,355 @@
+﻿=========================================================Основы языка Groovy====================================================================
+
+def имя_переменной - объявление переменной
+def int имя_переменной - объявление переменной с типом данных(типы языков как в Java)
+
+объявлять строковую переменную можно в одинарных или двойных кавычках
+def s = 'string'
+def s1 = "aaa $s aaa" - в строковую переменную можно вставить другую строковую переменную $имя_переменной, строка должна быть в двойных кавычках
+конкатенация строк работает также как в Java через +
+
+log.info имя_переменной - вывод значения переменной в лог
+
+==========================================Методы для работы со строковыми переменными===========================================================
+
+1) substring(start_index)
+2) substring(start index, end_index)
+3) indexOf(char name)
+4) replace(char name, char new_name)
+5) tokenize() - создаёт массив из строки
+6) padLeft(колво_символов, char name) - добавляет указанное количество символов в левую часть строки
+7) toUpperCase()
+8) toLowerCase()
+
+===================================================Условные операторы в Groovy==================================================================
+
+операторы "if" "switch" работают также как и в Java
+
+==========================================================Циклы в Groovy========================================================================
+
+стандартный цикл for такой же как в Java
+
+for (i in (0..10) ) {
+	log.info i
+}
+
+def int[] arr = [2,4,5,7]
+for (i in arr) {
+	log.info i
+}
+
+def int[] arr = [2,4,5,7]
+arr.each {			// for each цикл
+	log.info(it)
+}
+
+def n = 3 
+n.times {			// цикл, который будет повторяться n раз
+	log.info "привет" 
+}
+
+5.times {			// цикл, который будет повторяться 5 раз
+	log.info it 		// it - переменная встроенная в цикл, хранит инфо о номере итерации
+}
+
+==================================================Функции в языке Groovy=======================================================
+
+def fun(int a) {	// объявление функции
+	log.info a
+}
+
+def fun(int a) {	// объявление функции
+	return a
+}
+
+=====================================Использование классов, объектов в языке GROOVY============================================
+
+class Person {			// создание класса
+	String firstName
+	String lastName
+	String fullName(String pref) {
+		return pref + ":" + firstName + " " + lastName
+	}
+}
+
+class PersonWork extends Person {	// класс является наследником класса Person
+	String work				// поля и методы наследуются у супер класса
+}
+
+Person p = new Person(firstName : "Dan", lastName : "Smith") // создание объекта класса Person, передача значений переменным объекта 
+log.info p.fullName("info") // вызов метода 
+
+Можно использовать ключевое слово this
+
+Есть интерфейсы, работают как в Java
+
+==============================================Преобразование типов . Пауза в Groovy=======================================================
+
+def String str = "231"
+def int i = str.toInteger() // 1 способ
+def int i2 = str as int     // 2 способ
+def int i3 = Integer.parseInt(str) // 3 способ
+
+sleep(кол-во милисекунд) // установка паузы
+
+==============================================проверка результатов тестов на GROOVY=======================================================
+
+def groovyUtils = new com.eviware.soapui.support.GroovyUtils( context )
+def holder = groovyUtils.getXmlHolder('название_шага#Response')
+def check = holder.getNodeValue("//*:sCapitalCity") // получаем значение из тега с помощью xpath
+assert check == 'проверяемое значение' // создаём проверку значения
+
+def requestHolder = new com.eviware.soapui.support.XmlHolder( mockRequest.requestContent )
+def responseHolder = new com.eviware.soapui.support.XmlHolder( mockResponse.responseContent )
+def requestId = requestHolder["//requestId"]
+
+def groovyUtils = new com.eviware.soapui.support.GroovyUtils( context )
+def requestHolder = groovyUtils.getXmlHolder( messageExchange.requestContent )
+def responseHolder = groovyUtils.getXmlHolder( messageExchange.responseContent )
+//Объявление переменных
+def orderOMSId = responseHolder["//ns2:submitOrderResponse/order/acknowledgement/orderOMSId"]
+def requestId = requestHolder["//oms:submitOrderRequest/requestId"]
+def orderId =requestHolder["//oms:submitOrderRequest/order/orderId"]
+
+partyRole.each { assert it.text() in ['CLIENT','CONTACT', 'INITIATOR', 'SALES', 'KZ'] }
+
+========================================================отчет в CSV файле=================================================================
+
+https://dzone.com/articles/how-to-achieve-csv-reporting-in-soapui-open-source-1
+
+Подстановка переменных в тест кейс:
+
+${#Project#propertyname} - переменная созданная на уровне проекта
+${#TestSuite#propertyname} - переменная созданная на уровне test suite
+${#TestCase#propertyname} - переменная созданная на уровне test case
+${#TestStepName#PropertyName} — для уровня шага теста
+${#MockService#PropertyName} — для свойства MockService
+${#Global#PropertyName} — для глобальных свойств находится в меню «Файл» → «Настройки» → «Глобальные свойства». Это свойство можно использовать во всех проектах
+${#System#PropertyName} — для свойства системы, которое можно найти в справке → свойства системы
+${#Env#PropertyName} — для переменной среды
+
+=================================================================Groovy скрипты=================================================================================
+
+def groovycase - создание переменной
+def groovycase = testRunner.testCase.getPropertyValue("propcase") - получение значения переменной с названием propcase на уровне тест кейса
+def groovysuite = testRunner.testCase.testSuite.getPropertyValue("propsuite") - получение значения переменной с названием propcase на уровне test suite
+def groovyproject = testRunner.testCase.testSuite.project.getPropertyValue("propproject") - получение значения переменной с названием propcase на уровне проекта
+log.info groovycase - вывести значение переменной в лог
+
+testRunner.testCase.setPropertyValue("propcase", "new") - установить значение переменной с названием propcase на уровне тест кейса
+testRunner.testCase.testSuite.setPropertyValue("propsuite", "new") - установить значение переменной с названием propcase на уровне test suite
+testRunner.testCase.testSuite.project.setPropertyValue("propproject", "new") - установить значение переменной с названием propcase на уровне проекта
+
+com.eviware.soapui.SoapUI.globalProperties.setPropertyValue("clientId", orderId) - установка значения для глобальной переменной
+
+com.eviware.soapui.SoapUI.globalProperties.setPropertyValue("orderItemIdNEAC", testRunner.testCase.getPropertyValue("orderItemIdNEAC"))
+
+def orderOMSId = holder.getNodeValue("//*:orderOMSId") // достать значение из тест кейса
+com.eviware.soapui.SoapUI.globalProperties.setPropertyValue("fsomOrderOMSId", orderOMSId) // установить взятое значение для глобальной переменной
+
+// достаём значение переменной из test case в script assertion(не в мок)
+def testCase = messageExchange.modelItem.testCase;
+def expected = testCase.getPropertyValue("имя_переменной");
+
+==============================================================Setup script and TearDown script===================================================================
+if(testSuite.getPropertyValue("landscapeFlagProjectLevel").equals("false")) {
+	def testcase = runner.testSuite.project.testSuites["fsom_12_r"].testCases["ChooseLandscape"]
+	def runner = testcase.run( null, false )  
+	runner.testCase.testSuite.setPropertyValue("landscapeFlagTestSuiteLevel", "true")
+}
+
+testSuite.setPropertyValue("landscapeFlagTestSuiteLevel", "false")
+
+=========================================================================Context=================================================================================
+Переменная контекста - это специальная переменная в SoapUI, используемая для хранения значений, которые могут использоваться на последующих этапах тестирования в 
+рамках тест кейса.
+
+Create a Groovy script in SoapUI called "Groovy Script." Add the following code:
+
+context.setProperty("Myname","Remi")
+
+Create one more Groovy script called "Groovy Script 1." Add the below code:
+
+log.info context.getProperty("Myname")
+
+If we want to access the property "Myname" in the Groovy script, we need to run both scripts together as a test case. Select the test case and run it.
+
+
+=============================================================================Mocks===============================================================================
+Starting mock services
+testSuite.project.getMockServiceByName("mockFsomComNotify").start();
+testSuite.project.getMockServiceByName("mockHermesSubmitOrder").start();
+testSuite.project.getMockServiceByName("mockKtpSubmitOrder").start();
+testSuite.project.getMockServiceByName("mockWfmAppointment").start();
+
+for( mockService in testCase.testSuite.project.mockServiceList )
+{
+    def windowReference = com.eviware.soapui.support.UISupport.showDesktopPanel( mockService )
+    mockService.start() 
+    com.eviware.soapui.SoapUI.desktop.minimize( windowReference  )
+}
+
+
+def mockServiceSLTU = testCase.testSuite.project.getMockServiceByName("mockSltu")
+def windowReferenceSLTU = com.eviware.soapui.support.UISupport.showDesktopPanel(mockServiceSLTU)
+mockServiceSLTU.start() 
+testCase.testSuite.project.getMockServiceByName("mockSltu").getMockRunner().stop()
+
+def requestHolder = new com.eviware.soapui.support.XmlHolder( mockRequest.requestContent )
+def responseHolder = new com.eviware.soapui.support.XmlHolder( mockResponse.responseContent )
+
+def request = new XmlSlurper().parseText(mockRequest.requestContent)
+
+============================================================Получение списка значений из XML=====================================================================
+1)
+
+def groovyUtils = new com.eviware.soapui.support.GroovyUtils(context) - подгрузка GroovyUtils
+def holder = groovyUtils.getXmlHolder("название шага в тест кейсе#Response") - получение ответа тест кейса
+Создаём цикл, который будет перебирать элементы интересующие нас
+for (item in holder.getNodeValues("//*:sISOCode"))  // "//*:sISOCode" - xpath интересующего нас тега в response
+	log.info "item : [$item]" // вывод элементов в формте "item : [название элемента]"
+
+2)
+
+def groovyUtils = new com.eviware.soapui.support.GroovyUtils( context )
+//create XmlHolder for request content
+def requestHolder = new com.eviware.soapui.support.XmlHolder( messageExchange.requestContent )
+def responseHolder = new com.eviware.soapui.support.XmlHolder( messageExchange.responseContent )
+
+//Load XML request for assertions
+def response = new XmlSlurper().parseText(messageExchange.responseContent)
+//Extract cfs ids
+def cfsIdExtracted = response.Body.getCfsResponse.cfsList.cfs.cfsId
+def cfsStatusExtracted = response.Body.getCfsResponse.cfsList.cfs.cfsStatus
+def cfsSpecIdExtracted = response.Body.getCfsResponse.cfsList.cfs.cfsSpecification.specId
+//def cfsAttributeValuesExtracted = response.Body.getCfsResponse.cfsList.cfs.cfsAttributes.attribute
+//def cfsAttributeNamesExtracted = response.Body.getCfsResponse.cfsList.cfs.cfsAttributes.attribute.@name
+def cfsSuspensionStateExtracted = response.Body.getCfsResponse.cfsList.cfs.cfsSuspensionState
+
+// Получаем и проверяем количество услуг
+def countOfService = cfsSuspensionStateExtracted.size()
+assert countOfService == 3
+
+// Проверяем список подключённых услуг
+def checkNetwork = 0
+def checkAuth = 0
+def checkInternet = 0
+
+for(int i=0; i<cfsSpecIdExtracted.size(); i++) {
+	def value = cfsSpecIdExtracted.getAt(i)
+	if (value.equals("cfs_authorization"))  {
+		checkAuth++	
+	} else if (value.equals("cfs_network_access")) {
+		checkNetwork++
+	} else if (value.equals("cfs_internet")) {
+		checkInternet++
+	}
+}
+
+assert countOfService == checkNetwork + checkAuth + checkInternet
+
+// Проверяем отсутствие добровольной блокировки у услуг
+for(int i=0; i<cfsSuspensionStateExtracted.size(); i++) {
+	def value = cfsSuspensionStateExtracted.getAt(i)
+	assert value.equals("NONE")
+}
+
+// Проверяем cnfnec  услуг
+for(int i=0; i<cfsStatusExtracted.size(); i++) {
+	def value = cfsStatusExtracted.getAt(i)
+	assert value.equals("ACTIVE")
+}
+
+=========================================================Запуск тестового шага с помощью скрипта=================================================================
+
+def project = testRunner.testCase.testSuite.project
+testRunner.runTestStep(project.TestSuites["название testsuite"].testCases["название testcase"].testSteps["Название шага"]
+
+===============================================================Чтение данных из csv файла========================================================================
+
+def groovyUtils = new com.eviware.soapui.support.GroovyUtils( context )
+import com.eviware.soapui.support.UISupport
+import groovy.io.FileType
+import org.apache.commons.io.FileUtils
+//c:/users.csv
+
+def csvFilePath = "//c:/users.csv"
+context.fileReader = new BufferedReader(new FileReader(csvFilePath))
+def rowsData = context.fileReader.readLines()
+int rowsize = rowsData.size()
+for (int i = 1; i < rowsize; i++)  
+{
+	//log.info rowsData[i]
+	def data = rowsData[i].split(";")
+	//log.info data[0]
+	testRunner.testCase.setPropertyValue("id", data[0])
+	testRunner.testCase.setPropertyValue("username", data[1])
+	testRunner.testCase.setPropertyValue("firstName", data[2])
+	testRunner.testCase.setPropertyValue("lastName", data[3])
+	testRunner.testCase.setPropertyValue("email", data[4])
+	testRunner.testCase.setPropertyValue("password", data[5])
+	testRunner.testCase.setPropertyValue("phone", data[6])
+
+	def project = testRunner.testCase.testSuite.project
+	testRunner.runTestStep(project.TestSuites["PetstoreTestSuite"].testCases["usercase"].testSteps["CreateUser"]
+}
+
+
+=====================================================Популярные Groovy инъекции для генерации данных====================================================
+
+log.info Math.abs(new Random().nextInt() % 90000000) + 1 - создание рандомного числа в заданом диапозоне
+
+import org.apache.commons.lang.RandomStringUtils; 
+log.info RandomStringUtils.random(9, (('a'..'z') + ('A'..'Z') + ('0'..'9')).join().toCharArray()) - генерация случайного набора символов, где 9 - длина
+
+"${=import org.apache.commons.lang.RandomStringUtils; 
+log.info RandomStringUtils.random(9, (('a'..'z') + ('A'..'Z') + ('0'..'9')).join().toCharArray())}" - шаблон для подставления в запрос ${=скрипт}
+
+log.info java.util.UUID.randomUUID() - генерация случайного UUID
+
+log.info System.currentTimeMillis() - текущее время в милисекундах
+
+log.info new Date().format("yyyy-MM-dd hh:mm:ss") - текущее время
+
+
+==========================================================Данные JSON в GROOVY====================================================================
+
+import com.eviware.soapui.support.XmlHolder
+import groovy.json.JsonSlurper
+
+def response = context.expand( '${getUserByName#Response}' ).toString() - получение данных из response в виде String, где '${имя_шага#Response}'
+
+def slurper = new JsonSlurper()
+def json = slurper.parseText response - преобразуем полученную строку в JSON объект
+json.имя_заголовка - теперь можем обратиться к заголовку
+
+=================================================================Цикл по JSON значениям============================================================
+
+import com.eviware.soapui.support.XmlHolder
+import groovy.json.JsonSlurper
+
+def response = context.expand( '${findPetsByStatus#Response}' ).toString()
+def slurper = new JsonSlurper()
+def json = slurper.parseText response
+
+for( item in json)
+{
+    log.info item.name 
+    log.info item.id
+    log.info item.photoUrls
+    log.info item.category.name
+}
+
+
+========================================================Groovy script для MOCK==========================================================
+
+def holder = new com.eviware.soapui.support.XmlHolder(mockRequest.requestContent) - получаем запрос
+def iso = holder.getNodeValue("//*:sCountryISOCode") - получаем необходимое нам значение из строки запроса с помощью XPATH
+${sname} - создаём и указываем переменную в строке response
+if (iso == "RU") requestContext.sname = 'Russia' - создаём условие, если оно true, то устанавливаем значение для переменной в response
+
+
+         </order>
+      </ns2:orderStatusNotification>
+   </soap:Body>
+</soap:Envelope>
